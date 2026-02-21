@@ -1115,17 +1115,17 @@ const BerandaView = ({ setView, onAddAgenda, currentTime, onSelectAgenda, onEdit
       {/* Hero Section */}
       <section className="bg-blue-900 rounded-[2.5rem] p-6 lg:p-10 text-white relative overflow-hidden shadow-2xl shadow-blue-900/30">
         <div className="relative z-10">
-          <div className="flex flex-col lg:flex-row justify-between items-start gap-6">
-            <div className="space-y-1">
+          <div className="flex flex-col items-center text-center gap-6 lg:gap-8">
+            <div className="space-y-2">
               <h2 className="text-lg lg:text-xl font-bold opacity-80 tracking-tight">Selamat Datang,</h2>
               <h3 className="text-2xl lg:text-4xl font-black tracking-tighter leading-tight">{profile.name}</h3>
               <p className="text-xs lg:text-sm font-bold text-blue-300 uppercase tracking-widest">{profile.title}</p>
             </div>
-            <div className="bg-white/10 backdrop-blur-xl rounded-2xl px-5 py-3 border border-white/10 w-full lg:w-auto">
+            <div className="bg-white/10 backdrop-blur-xl rounded-2xl px-5 py-3 border border-white/10 w-fit mx-auto">
               <p className="text-xs lg:text-sm font-bold tracking-wide opacity-90">{formattedDate}</p>
             </div>
           </div>
-          <div className="mt-8 lg:mt-10 flex flex-col lg:flex-row lg:items-center gap-4">
+          <div className="mt-8 lg:mt-12 flex flex-col items-center gap-4 text-center">
             <div className="bg-emerald-500 text-white px-5 py-2 rounded-2xl text-xs font-black uppercase tracking-widest flex items-center gap-2 w-fit shadow-lg shadow-emerald-500/20">
               <Calendar size={16} />
               {todayAgendasCount} Agenda Hari Ini
