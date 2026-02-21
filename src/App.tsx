@@ -1125,7 +1125,7 @@ const BerandaView = ({ setView, onAddAgenda, currentTime, onSelectAgenda, onEdit
               <p className="text-xs lg:text-sm font-bold tracking-wide opacity-90">{formattedDate}</p>
             </div>
           </div>
-          <div className="mt-8 lg:mt-12 flex flex-col items-center gap-4 text-center">
+          <div className="mt-10 lg:mt-14 flex flex-col items-center gap-4 text-center">
             <div className="bg-emerald-500 text-white px-5 py-2 rounded-2xl text-xs font-black uppercase tracking-widest flex items-center gap-2 w-fit shadow-lg shadow-emerald-500/20">
               <Calendar size={16} />
               {todayAgendasCount} Agenda Hari Ini
@@ -1135,7 +1135,8 @@ const BerandaView = ({ setView, onAddAgenda, currentTime, onSelectAgenda, onEdit
             </p>
           </div>
         </div>
-        {/* Decorative circles */}
+        {/* Decorative elements */}
+        <Calendar size={240} className="absolute -right-12 -bottom-12 text-white opacity-10 -rotate-12 pointer-events-none" />
         <div className="absolute -right-20 -top-20 w-64 h-64 bg-blue-800 rounded-full opacity-50 blur-3xl"></div>
         <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-blue-700 rounded-full opacity-30 blur-3xl"></div>
       </section>
