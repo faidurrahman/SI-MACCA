@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Home, 
   Calendar, 
@@ -1079,12 +1079,27 @@ const BerandaView = ({ setView, onAddAgenda, currentTime, onSelectAgenda, onEdit
     year: 'numeric' 
   });
 
-  const todayAgendas = agendas.length;
+  const todayAgendas = agendas.filter(a => {
+    if (!a.rawDate) return false;
+    const aDate = new Date(a.rawDate);
+    return aDate.toDateString() === currentTime.toDateString();
+  });
 
-  const nextAgenda = agendas[0] || {
+  const todayAgendasCount = todayAgendas.length;
+
+  const sortedTodayAgendas = [...todayAgendas].sort((a, b) => {
+    const timeToMinutes = (t: string) => {
+      const part = t.split(' ')[0];
+      const [h, m] = part.includes(':') ? part.split(':').map(Number) : part.split('.').map(Number);
+      return (h || 0) * 60 + (m || 0);
+    };
+    return timeToMinutes(a.time) - timeToMinutes(b.time);
+  });
+
+  const nextAgenda = sortedTodayAgendas[0] || {
     id: '0',
     time: '--.--',
-    title: 'Tidak ada agenda terdekat',
+    title: 'Tidak ada agenda tersisa hari ini',
     status: 'HADIR',
     date: '',
     organizer: '-',
@@ -1113,7 +1128,7 @@ const BerandaView = ({ setView, onAddAgenda, currentTime, onSelectAgenda, onEdit
           <div className="mt-8 lg:mt-10 flex flex-col lg:flex-row lg:items-center gap-4">
             <div className="bg-emerald-500 text-white px-5 py-2 rounded-2xl text-xs font-black uppercase tracking-widest flex items-center gap-2 w-fit shadow-lg shadow-emerald-500/20">
               <Calendar size={16} />
-              {todayAgendas} Agenda Terdaftar
+              {todayAgendasCount} Agenda Hari Ini
             </div>
             <p className="text-blue-200/80 text-xs lg:text-sm font-bold tracking-tight">
               {agendas.length > 0 ? `Agenda terdekat: ${nextAgenda.title}` : 'Semua data sinkron dengan Google Sheets'}
@@ -1249,6 +1264,17 @@ const BerandaView = ({ setView, onAddAgenda, currentTime, onSelectAgenda, onEdit
 const JadwalView = ({ currentTime, onSelectAgenda, onEditAgenda, agendas, fetchAgendas, isLoading, user }: { currentTime: Date, onSelectAgenda: (a: AgendaItem) => void, onEditAgenda: (a: AgendaItem) => void, agendas: AgendaItem[], fetchAgendas: () => void, isLoading: boolean, user: AuthUser | null }) => {
   const [filter, setFilter] = useState<string>('SEMUA');
   const [selectedDate, setSelectedDate] = useState<Date>(new Date(currentTime));
+  const activeDateRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (activeDateRef.current) {
+      activeDateRef.current.scrollIntoView({
+        behavior: 'smooth',
+        inline: 'center',
+        block: 'nearest'
+      });
+    }
+  }, [selectedDate]);
   
   const currentMonth = selectedDate.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
   const selectedFormatted = selectedDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
@@ -1328,6 +1354,7 @@ const JadwalView = ({ currentTime, onSelectAgenda, onEditAgenda, agendas, fetchA
             {weekDates.map((d, i) => (
               <button 
                 key={i}
+                ref={d.active ? activeDateRef : null}
                 onClick={() => setSelectedDate(d.fullDate)}
                 className={`flex flex-col items-center justify-center w-14 lg:w-16 h-16 lg:h-20 rounded-2xl transition-all duration-200 ${
                   d.active 
@@ -1345,19 +1372,21 @@ const JadwalView = ({ currentTime, onSelectAgenda, onEditAgenda, agendas, fetchA
 
       {/* Agenda List */}
       <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-2">
-          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-            <h4 className="text-lg font-bold text-gray-900 shrink-0">
-              {selectedDate.toDateString() === new Date().toDateString() ? 'Agenda Hari Ini' : `Agenda ${selectedDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}`}
-            </h4>
-            <button 
-              onClick={fetchAgendas}
-              disabled={isLoading}
-              className="p-2 bg-white border border-gray-100 rounded-xl shadow-sm hover:bg-blue-50 hover:text-blue-600 transition-all disabled:opacity-50"
-              title="Segarkan Data"
-            >
-              <Cloud size={16} className={isLoading ? 'animate-pulse' : ''} />
-            </button>
+        <div className="flex flex-col gap-4 px-2">
+          <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <h4 className="text-lg font-bold text-gray-900 shrink-0">
+                {selectedDate.toDateString() === new Date().toDateString() ? 'Agenda Hari Ini' : `Agenda ${selectedDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}`}
+              </h4>
+              <button 
+                onClick={fetchAgendas}
+                disabled={isLoading}
+                className="p-2 bg-white border border-gray-100 rounded-xl shadow-sm hover:bg-blue-50 hover:text-blue-600 transition-all disabled:opacity-50"
+                title="Segarkan Data"
+              >
+                <Cloud size={16} className={isLoading ? 'animate-pulse' : ''} />
+              </button>
+            </div>
             <div className="relative group max-w-full">
               <div className="flex items-center gap-2 bg-white border border-gray-100 rounded-xl px-2.5 sm:px-3 py-1.5 shadow-sm cursor-pointer hover:border-blue-200 transition-all overflow-hidden">
                 <Filter size={14} className="text-blue-600 shrink-0" />
@@ -1375,9 +1404,9 @@ const JadwalView = ({ currentTime, onSelectAgenda, onEditAgenda, agendas, fetchA
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-xs lg:text-sm text-gray-500 sm:shrink-0">
+          <div className="w-full flex justify-center items-center gap-2 text-xs lg:text-sm text-gray-500 py-1">
             <Calendar size={14} />
-            <span>{selectedFormatted}</span>
+            <span className="text-center">{selectedFormatted}</span>
           </div>
         </div>
         
