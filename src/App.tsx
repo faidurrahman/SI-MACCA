@@ -29,7 +29,8 @@ import {
   Download,
   Filter,
   ArrowRight,
-  CalendarRange
+  CalendarRange,
+  Trash2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Swal from 'sweetalert2';
@@ -1262,7 +1263,7 @@ const BerandaView = ({ setView, onAddAgenda, currentTime, onSelectAgenda, onEdit
   );
 };
 
-const JadwalView = ({ currentTime, onSelectAgenda, onEditAgenda, agendas, fetchAgendas, isLoading, user }: { currentTime: Date, onSelectAgenda: (a: AgendaItem) => void, onEditAgenda: (a: AgendaItem) => void, agendas: AgendaItem[], fetchAgendas: () => void, isLoading: boolean, user: AuthUser | null }) => {
+const JadwalView = ({ currentTime, onSelectAgenda, onEditAgenda, onDeleteAgenda, agendas, fetchAgendas, isLoading, user }: { currentTime: Date, onSelectAgenda: (a: AgendaItem) => void, onEditAgenda: (a: AgendaItem) => void, onDeleteAgenda: (id: string) => void, agendas: AgendaItem[], fetchAgendas: () => void, isLoading: boolean, user: AuthUser | null }) => {
   const [filter, setFilter] = useState<string>('SEMUA');
   const [selectedDate, setSelectedDate] = useState<Date>(new Date(currentTime));
   const [displayedMonth, setDisplayedMonth] = useState<string>(
@@ -1510,6 +1511,19 @@ const JadwalView = ({ currentTime, onSelectAgenda, onEditAgenda, agendas, fetchA
                   >
                     <Edit size={14} />
                     EDIT
+                  </button>
+                )}
+                {user?.role === 'ADMIN' && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDeleteAgenda(agenda.id);
+                    }}
+                    className="flex items-center justify-center gap-2 bg-red-50 text-red-500 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all duration-200 shadow-sm"
+                    title="Hapus Jadwal"
+                  >
+                    <Trash2 size={14} />
+                    HAPUS
                   </button>
                 )}
                 <button 
@@ -2022,6 +2036,30 @@ export default function App() {
     setIsAgendaModalOpen(true);
   };
 
+  const handleDeleteAgenda = async (id: string) => {
+    if (user?.role !== 'ADMIN') return;
+    
+    const result = await Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "Data jadwal yang dihapus tidak dapat dikembalikan!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Ya, Hapus!',
+      cancelButtonText: 'Batal'
+    });
+
+    if (result.isConfirmed) {
+      setAgendas(prev => prev.filter(a => a.id !== id));
+      await Swal.fire(
+        'Terhapus!',
+        'Jadwal berhasil dihapus.',
+        'success'
+      );
+    }
+  };
+
   const handleAddAgenda = () => {
     if (user?.role !== 'ADMIN') return;
     setSelectedAgenda(null);
@@ -2088,6 +2126,7 @@ export default function App() {
                 currentTime={currentTime} 
                 onSelectAgenda={handleSelectAgenda}
                 onEditAgenda={handleEditAgenda}
+                onDeleteAgenda={handleDeleteAgenda}
                 agendas={agendas}
                 fetchAgendas={fetchAgendas}
                 isLoading={isLoading}
