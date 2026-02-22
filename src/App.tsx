@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   Home, 
   Calendar, 
@@ -1265,46 +1265,107 @@ const BerandaView = ({ setView, onAddAgenda, currentTime, onSelectAgenda, onEdit
 const JadwalView = ({ currentTime, onSelectAgenda, onEditAgenda, agendas, fetchAgendas, isLoading, user }: { currentTime: Date, onSelectAgenda: (a: AgendaItem) => void, onEditAgenda: (a: AgendaItem) => void, agendas: AgendaItem[], fetchAgendas: () => void, isLoading: boolean, user: AuthUser | null }) => {
   const [filter, setFilter] = useState<string>('SEMUA');
   const [selectedDate, setSelectedDate] = useState<Date>(new Date(currentTime));
+  const [displayedMonth, setDisplayedMonth] = useState<string>(
+    new Date(currentTime).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })
+  );
   const activeDateRef = useRef<HTMLButtonElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  // Recursive Date Generator State
+  const [timelineDates, setTimelineDates] = useState<{day: string, date: string, fullDate: Date}[]>([]);
+  
+  // Initial generation
   useEffect(() => {
-    if (activeDateRef.current) {
+    const initialDates = [];
+    const today = new Date(currentTime);
+    // Start from 30 days ago to 60 days ahead
+    for (let i = -30; i <= 60; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+      initialDates.push({
+        day: d.toLocaleDateString('id-ID', { weekday: 'short' }),
+        date: d.getDate().toString(),
+        fullDate: new Date(d),
+      });
+    }
+    setTimelineDates(initialDates);
+  }, [currentTime]);
+
+  // Center active date on initial load once dates are populated
+  useEffect(() => {
+    if (timelineDates.length > 0 && activeDateRef.current) {
       activeDateRef.current.scrollIntoView({
-        behavior: 'smooth',
+        behavior: 'auto',
         inline: 'center',
         block: 'nearest'
       });
     }
-  }, [selectedDate]);
-  
-  const currentMonth = selectedDate.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+  }, [timelineDates.length]);
+
+  const loadMoreDates = () => {
+    setTimelineDates(prev => {
+      if (prev.length === 0) return prev;
+      const lastDate = prev[prev.length - 1].fullDate;
+      const nextDates = [];
+      // Append next 30 days
+      for (let i = 1; i <= 30; i++) {
+        const d = new Date(lastDate);
+        d.setDate(lastDate.getDate() + i);
+        nextDates.push({
+          day: d.toLocaleDateString('id-ID', { weekday: 'short' }),
+          date: d.getDate().toString(),
+          fullDate: new Date(d),
+        });
+      }
+      return [...prev, ...nextDates];
+    });
+  };
+
+  // Update displayed month based on scroll position and check for infinite scroll
+  const handleScroll = () => {
+    if (!scrollContainerRef.current || timelineDates.length === 0) return;
+    
+    const container = scrollContainerRef.current;
+    
+    // Infinite Scroll Check (80% mark)
+    const { scrollLeft, scrollWidth, clientWidth } = container;
+    if (scrollLeft + clientWidth >= scrollWidth * 0.8) {
+      loadMoreDates();
+    }
+    
+    const containerRect = container.getBoundingClientRect();
+    const containerCenter = containerRect.left + containerRect.width / 2;
+    
+    const children = Array.from(container.children[0].children) as HTMLElement[];
+    let closestElement: HTMLElement | null = null;
+    let minDistance = Infinity;
+    
+    children.forEach((child) => {
+      const rect = child.getBoundingClientRect();
+      const childCenter = rect.left + rect.width / 2;
+      const distance = Math.abs(containerCenter - childCenter);
+      
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestElement = child;
+      }
+    });
+    
+    if (closestElement) {
+      const index = children.indexOf(closestElement);
+      const date = timelineDates[index]?.fullDate;
+      if (date) {
+        const monthStr = date.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+        if (monthStr !== displayedMonth) {
+          setDisplayedMonth(monthStr);
+        }
+      }
+    }
+  };
+
   const selectedFormatted = selectedDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
 
   const disposisiOptions = DISPOSISI_OPTIONS;
-
-  // Generate dates for the current week centered around selectedDate
-  const getWeekDates = (date: Date) => {
-    const week = [];
-    const start = new Date(date);
-    // Find Monday of the week containing the date
-    const day = start.getDay();
-    const diff = start.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
-    start.setDate(diff);
-    
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(start);
-      d.setDate(start.getDate() + i);
-      week.push({
-        day: d.toLocaleDateString('id-ID', { weekday: 'short' }),
-        date: d.getDate().toString(),
-        fullDate: new Date(d),
-        active: d.toDateString() === selectedDate.toDateString()
-      });
-    }
-    return week;
-  };
-
-  const weekDates = getWeekDates(selectedDate);
 
   const filteredAgendas = agendas.filter(a => {
     // Filter by date
@@ -1324,49 +1385,43 @@ const JadwalView = ({ currentTime, onSelectAgenda, onEditAgenda, agendas, fetchA
       className="space-y-6 lg:space-y-8"
     >
       {/* Date Strip */}
-      <div className="bg-white border border-gray-100 rounded-3xl lg:rounded-[2rem] p-4 lg:p-6 shadow-sm">
-        <div className="flex items-center justify-between mb-4 px-2">
-          <h4 className="text-sm font-bold text-gray-900 uppercase tracking-widest">{currentMonth}</h4>
-          <div className="flex gap-2">
-            <button 
-              onClick={() => {
-                const newDate = new Date(selectedDate);
-                newDate.setDate(selectedDate.getDate() - 7);
-                setSelectedDate(newDate);
-              }}
-              className="p-1 text-gray-400 hover:text-blue-900 transition-colors"
-            >
-              <ChevronRight size={18} className="rotate-180" />
-            </button>
-            <button 
-              onClick={() => {
-                const newDate = new Date(selectedDate);
-                newDate.setDate(selectedDate.getDate() + 7);
-                setSelectedDate(newDate);
-              }}
-              className="p-1 text-gray-400 hover:text-blue-900 transition-colors"
-            >
-              <ChevronRight size={18} />
-            </button>
-          </div>
+      <div className="bg-white border border-gray-100 rounded-3xl lg:rounded-[2rem] p-4 lg:p-6 shadow-sm overflow-hidden">
+        <div className="flex items-center justify-center mb-6 px-2">
+          <h4 className="text-sm font-black text-blue-900 uppercase tracking-[0.2em] bg-blue-50 px-6 py-2 rounded-full border border-blue-100">
+            {displayedMonth}
+          </h4>
         </div>
-        <div className="overflow-x-auto no-scrollbar">
-          <div className="flex justify-between items-center min-w-max gap-3 lg:gap-4 px-2">
-            {weekDates.map((d, i) => (
-              <button 
-                key={i}
-                ref={d.active ? activeDateRef : null}
-                onClick={() => setSelectedDate(d.fullDate)}
-                className={`flex flex-col items-center justify-center w-14 lg:w-16 h-16 lg:h-20 rounded-2xl transition-all duration-200 ${
-                  d.active 
-                    ? 'bg-blue-900 text-white shadow-lg shadow-blue-900/30 scale-105' 
-                    : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'
-                }`}
-              >
-                <span className="text-[8px] lg:text-[10px] font-bold uppercase tracking-wider mb-1">{d.day}</span>
-                <span className="text-lg lg:text-xl font-extrabold">{d.date}</span>
-              </button>
-            ))}
+        <div 
+          ref={scrollContainerRef}
+          onScroll={handleScroll}
+          className="overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory"
+        >
+          <div className="flex items-center gap-3 lg:gap-4 px-4 pb-2">
+            {timelineDates.map((d, i) => {
+              const isActive = d.fullDate.toDateString() === selectedDate.toDateString();
+              return (
+                <button 
+                  key={i}
+                  ref={isActive ? activeDateRef : null}
+                  onClick={() => setSelectedDate(d.fullDate)}
+                  className={`flex flex-col items-center justify-center min-w-[60px] lg:min-w-[70px] h-20 lg:h-24 rounded-2xl transition-all duration-300 snap-center ${
+                    isActive 
+                      ? 'bg-blue-900 text-white shadow-xl shadow-blue-900/30 scale-110 z-10' 
+                      : 'bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-gray-600'
+                  }`}
+                >
+                  <span className={`text-[9px] lg:text-[11px] font-bold uppercase tracking-wider mb-1 ${isActive ? 'text-blue-100' : 'text-gray-400'}`}>
+                    {d.day}
+                  </span>
+                  <span className="text-xl lg:text-2xl font-black">
+                    {d.date}
+                  </span>
+                  {d.fullDate.toDateString() === new Date(currentTime).toDateString() && !isActive && (
+                    <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1"></div>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
