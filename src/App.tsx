@@ -877,7 +877,7 @@ const Sidebar = ({ currentView, setView, isOpen, user, profile, onLogout }: { cu
   const navItems = [
     { id: 'Beranda' as View, icon: Home, label: 'Beranda' },
     { id: 'Jadwal' as View, icon: Calendar, label: 'Jadwal' },
-    { id: 'Laporan' as View, icon: FileText, label: 'Laporan', adminOnly: true },
+    { id: 'Laporan' as View, icon: FileText, label: 'Laporan', adminOnly: false },
   ].filter(item => !item.adminOnly || user?.role === 'ADMIN');
 
   return (
@@ -946,7 +946,7 @@ const BottomNav = ({ currentView, setView, user }: { currentView: View, setView:
   const navItems = [
     { id: 'Beranda' as View, icon: Home, label: 'Beranda' },
     { id: 'Jadwal' as View, icon: Calendar, label: 'Jadwal' },
-    { id: 'Laporan' as View, icon: FileText, label: 'Laporan', adminOnly: true },
+    { id: 'Laporan' as View, icon: FileText, label: 'Laporan', adminOnly: false },
   ].filter(item => !item.adminOnly || user?.role === 'ADMIN');
 
   return (
@@ -1594,16 +1594,41 @@ const LaporanView = ({ setView, agendas }: { setView: (v: View) => void, agendas
 
     setIsGenerating(true);
     try {
-      // Filter data locally from agendas prop
-      const start = new Date(startDate);
-      start.setHours(0, 0, 0, 0);
-      const end = new Date(endDate);
-      end.setHours(23, 59, 59, 999);
-
+      // Filter data locally from agendas prop using string comparison to avoid timezone shifts
       const filteredData = agendas.filter(item => {
         if (!item.rawDate) return false;
-        const itemDate = new Date(item.rawDate);
-        return !isNaN(itemDate.getTime()) && itemDate >= start && itemDate <= end;
+        let rawDate = item.rawDate.trim();
+        
+        // If it's exactly YYYY-MM-DD, use it directly
+        if (/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) {
+           const itemDateKey = rawDate;
+           return itemDateKey >= startDate && itemDateKey <= endDate;
+        }
+
+        let d = new Date(rawDate);
+        
+        // Fallback for DD-MM-YYYY or DD/MM/YYYY if standard parse fails
+        if (isNaN(d.getTime())) {
+          const parts = rawDate.split(/[-/]/);
+          if (parts.length === 3) {
+            // Check if it looks like D-M-Y (year is last)
+            if (parts[2].length === 4) {
+               const day = parseInt(parts[0]);
+               const month = parseInt(parts[1]) - 1;
+               const year = parseInt(parts[2]);
+               d = new Date(year, month, day);
+            }
+          }
+        }
+
+        if (isNaN(d.getTime())) return false;
+        
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        const itemDateKey = `${year}-${month}-${day}`;
+        
+        return itemDateKey >= startDate && itemDateKey <= endDate;
       });
 
       if (filteredData.length === 0) {
@@ -1617,6 +1642,22 @@ const LaporanView = ({ setView, agendas }: { setView: (v: View) => void, agendas
         return;
       }
 
+      let signatureBase64: string | null = null;
+      try {
+        const res = await fetch('https://images.weserv.nl/?url=drive.google.com/uc?id=1qfWqNcBAr_waENFOfh4_GKIZzIc1JjMG');
+        if (res.ok) {
+          const blob = await res.blob();
+          signatureBase64 = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          });
+        }
+      } catch (e) {
+        console.warn('Failed to load signature image', e);
+      }
+
       const doc = new jsPDF({
         orientation: 'landscape',
         unit: 'mm',
@@ -1626,8 +1667,9 @@ const LaporanView = ({ setView, agendas }: { setView: (v: View) => void, agendas
       // Helper for Indonesian Day Name
       const getIndoDay = (dateStr: string) => {
         const days = ['MINGGU', 'SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', 'SABTU'];
-        const d = new Date(dateStr);
-        return !isNaN(d.getTime()) ? days[d.getDay()] : '-';
+        const [y, m, d] = dateStr.split('-');
+        const date = new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+        return !isNaN(date.getTime()) ? days[date.getDay()] : '-';
       };
 
       // Helper for Indonesian Month Name
@@ -1636,22 +1678,47 @@ const LaporanView = ({ setView, agendas }: { setView: (v: View) => void, agendas
           'JANUARI', 'FEBRUARI', 'MARET', 'APRIL', 'MEI', 'JUNI',
           'JULI', 'AGUSTUS', 'SEPTEMBER', 'OKTOBER', 'NOVEMBER', 'DESEMBER'
         ];
-        const d = new Date(dateStr);
-        if (isNaN(d.getTime())) return '-';
-        return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+        const [y, m, d] = dateStr.split('-');
+        const date = new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+        if (isNaN(date.getTime())) return '-';
+        return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
       };
 
       // Group data by date (using YYYY-MM-DD for consistent grouping)
       const groupedData: { [key: string]: any[] } = {};
       filteredData.forEach(item => {
-        const d = new Date(item.rawDate);
-        if (isNaN(d.getTime())) return;
-        const dateKey = d.toISOString().split('T')[0];
+        if (!item.rawDate) return;
+        let rawDate = item.rawDate.trim();
+        let dateKey = '';
+
+        if (/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) {
+           dateKey = rawDate;
+        } else {
+           let d = new Date(rawDate);
+           if (isNaN(d.getTime())) {
+              const parts = rawDate.split(/[-/]/);
+              if (parts.length === 3 && parts[2].length === 4) {
+                 const day = parseInt(parts[0]);
+                 const month = parseInt(parts[1]) - 1;
+                 const year = parseInt(parts[2]);
+                 d = new Date(year, month, day);
+              }
+           }
+           if (!isNaN(d.getTime())) {
+              const year = d.getFullYear();
+              const month = String(d.getMonth() + 1).padStart(2, '0');
+              const day = String(d.getDate()).padStart(2, '0');
+              dateKey = `${year}-${month}-${day}`;
+           }
+        }
+        
+        if (!dateKey) return;
+        
         if (!groupedData[dateKey]) groupedData[dateKey] = [];
         groupedData[dateKey].push(item);
       });
 
-      const sortedDates = Object.keys(groupedData).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+      const sortedDates = Object.keys(groupedData).sort();
 
       sortedDates.forEach((dateKey, index) => {
         if (index > 0) doc.addPage();
@@ -1746,6 +1813,10 @@ const LaporanView = ({ setView, agendas }: { setView: (v: View) => void, agendas
           doc.text("MENGETAHUI,", 20, 20);
           doc.text("SEKRETARIS CAMAT", 20, 25);
           
+          if (signatureBase64) {
+            doc.addImage(signatureBase64, 'PNG', 20, 28, 40, 25);
+          }
+          
           doc.setFont("helvetica", "bold");
           doc.text("FIRMAN JAMALUDDIN, S.STP", 20, 55);
           doc.line(20, 56, 70, 56);
@@ -1756,6 +1827,10 @@ const LaporanView = ({ setView, agendas }: { setView: (v: View) => void, agendas
           doc.text("MENGETAHUI,", 20, finalY);
           doc.text("SEKRETARIS CAMAT", 20, finalY + 5);
           
+          if (signatureBase64) {
+            doc.addImage(signatureBase64, 'PNG', 20, finalY + 8, 40, 25);
+          }
+          
           doc.setFont("helvetica", "bold");
           doc.text("FIRMAN JAMALUDDIN, S.STP", 20, finalY + 35);
           doc.line(20, finalY + 36, 70, finalY + 36);
@@ -1765,7 +1840,12 @@ const LaporanView = ({ setView, agendas }: { setView: (v: View) => void, agendas
         }
       });
 
-      doc.save(`Laporan_Agenda_${startDate}_sd_${endDate}.pdf`);
+      const firstDate = sortedDates[0];
+      const lastDate = sortedDates[sortedDates.length - 1];
+      const fileName = firstDate === lastDate 
+        ? `Laporan_Agenda_${firstDate}.pdf`
+        : `Laporan_Agenda_${firstDate}_sd_${lastDate}.pdf`;
+      doc.save(fileName);
 
       Swal.fire({
         icon: 'success',
