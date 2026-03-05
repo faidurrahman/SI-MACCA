@@ -11,6 +11,7 @@ import {
   Plus, 
   Cloud, 
   ChevronRight, 
+  ChevronLeft,
   ExternalLink,
   Search,
   Bell,
@@ -1364,6 +1365,18 @@ const JadwalView = ({ currentTime, onSelectAgenda, onEditAgenda, onDeleteAgenda,
     }
   };
 
+  const scrollLeft = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: -250, behavior: 'smooth' });
+    }
+  };
+
+  const scrollRight = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: 250, behavior: 'smooth' });
+    }
+  };
+
   const selectedFormatted = selectedDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
 
   const disposisiOptions = DISPOSISI_OPTIONS;
@@ -1386,44 +1399,63 @@ const JadwalView = ({ currentTime, onSelectAgenda, onEditAgenda, onDeleteAgenda,
       className="space-y-6 lg:space-y-8"
     >
       {/* Date Strip */}
-      <div className="bg-white border border-gray-100 rounded-3xl lg:rounded-[2rem] p-4 lg:p-6 shadow-sm overflow-hidden">
+      <div className="bg-white border border-gray-100 rounded-3xl lg:rounded-[2rem] p-4 lg:p-6 shadow-sm overflow-hidden relative">
         <div className="flex items-center justify-center mb-6 px-2">
           <h4 className="text-sm font-black text-blue-900 uppercase tracking-[0.2em] bg-blue-50 px-6 py-2 rounded-full border border-blue-100">
             {displayedMonth}
           </h4>
         </div>
-        <div 
-          ref={scrollContainerRef}
-          onScroll={handleScroll}
-          className="overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory"
-        >
-          <div className="flex items-center gap-3 lg:gap-4 px-4 pb-2">
-            {timelineDates.map((d, i) => {
-              const isActive = d.fullDate.toDateString() === selectedDate.toDateString();
-              return (
-                <button 
-                  key={i}
-                  ref={isActive ? activeDateRef : null}
-                  onClick={() => setSelectedDate(d.fullDate)}
-                  className={`flex flex-col items-center justify-center min-w-[60px] lg:min-w-[70px] h-20 lg:h-24 rounded-2xl transition-all duration-300 snap-center ${
-                    isActive 
-                      ? 'bg-blue-900 text-white shadow-xl shadow-blue-900/30 scale-110 z-10' 
-                      : 'bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-gray-600'
-                  }`}
-                >
-                  <span className={`text-[9px] lg:text-[11px] font-bold uppercase tracking-wider mb-1 ${isActive ? 'text-blue-100' : 'text-gray-400'}`}>
-                    {d.day}
-                  </span>
-                  <span className="text-xl lg:text-2xl font-black">
-                    {d.date}
-                  </span>
-                  {d.fullDate.toDateString() === new Date(currentTime).toDateString() && !isActive && (
-                    <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1"></div>
-                  )}
-                </button>
-              );
-            })}
+        
+        <div className="relative group">
+          {/* Navigation Left */}
+          <button 
+            onClick={scrollLeft}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white border border-gray-100 rounded-full shadow-md flex items-center justify-center text-gray-400 hover:text-blue-900 hover:border-blue-200 hover:bg-blue-50 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 -ml-2 lg:-ml-4"
+          >
+            <ChevronLeft size={20} />
+          </button>
+
+          <div 
+            ref={scrollContainerRef}
+            onScroll={handleScroll}
+            className="overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory"
+          >
+            <div className="flex items-center gap-3 lg:gap-4 px-4 pb-2">
+              {timelineDates.map((d, i) => {
+                const isActive = d.fullDate.toDateString() === selectedDate.toDateString();
+                return (
+                  <button 
+                    key={i}
+                    ref={isActive ? activeDateRef : null}
+                    onClick={() => setSelectedDate(d.fullDate)}
+                    className={`flex flex-col items-center justify-center min-w-[60px] lg:min-w-[70px] h-20 lg:h-24 rounded-2xl transition-all duration-300 snap-center ${
+                      isActive 
+                        ? 'bg-blue-900 text-white shadow-xl shadow-blue-900/30 scale-110 z-10' 
+                        : 'bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-gray-600'
+                    }`}
+                  >
+                    <span className={`text-[9px] lg:text-[11px] font-bold uppercase tracking-wider mb-1 ${isActive ? 'text-blue-100' : 'text-gray-400'}`}>
+                      {d.day}
+                    </span>
+                    <span className="text-xl lg:text-2xl font-black">
+                      {d.date}
+                    </span>
+                    {d.fullDate.toDateString() === new Date(currentTime).toDateString() && !isActive && (
+                      <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1"></div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
+
+          {/* Navigation Right */}
+          <button 
+            onClick={scrollRight}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white border border-gray-100 rounded-full shadow-md flex items-center justify-center text-gray-400 hover:text-blue-900 hover:border-blue-200 hover:bg-blue-50 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 -mr-2 lg:-mr-4"
+          >
+            <ChevronRight size={20} />
+          </button>
         </div>
       </div>
 
