@@ -1676,7 +1676,7 @@ const LaporanView = ({ setView, agendas }: { setView: (v: View) => void, agendas
 
       let signatureBase64: string | null = null;
       try {
-        const res = await fetch('https://images.weserv.nl/?url=drive.google.com/uc?id=1qfWqNcBAr_waENFOfh4_GKIZzIc1JjMG');
+        const res = await fetch('https://images.weserv.nl/?url=drive.google.com/uc?id=1L8e2ypaPzAuZddIVk-YNTlGTPS6U11DC');
         if (res.ok) {
           const blob = await res.blob();
           signatureBase64 = await new Promise<string>((resolve, reject) => {
@@ -1839,14 +1839,14 @@ const LaporanView = ({ setView, agendas }: { setView: (v: View) => void, agendas
 
         // Footer
         const finalY = (doc as any).lastAutoTable.finalY + 10;
-        if (finalY + 40 > doc.internal.pageSize.getHeight()) {
+        if (finalY + 60 > doc.internal.pageSize.getHeight()) {
           doc.addPage();
           // Reset Y for new page
           doc.text("MENGETAHUI,", 20, 20);
           doc.text("SEKRETARIS CAMAT", 20, 25);
           
           if (signatureBase64) {
-            doc.addImage(signatureBase64, 'PNG', 20, 28, 40, 25);
+            doc.addImage(signatureBase64, 'PNG', 5, 10, 100, 60);
           }
           
           doc.setFont("helvetica", "bold");
@@ -1860,7 +1860,7 @@ const LaporanView = ({ setView, agendas }: { setView: (v: View) => void, agendas
           doc.text("SEKRETARIS CAMAT", 20, finalY + 5);
           
           if (signatureBase64) {
-            doc.addImage(signatureBase64, 'PNG', 20, finalY + 8, 40, 25);
+            doc.addImage(signatureBase64, 'PNG', 5, finalY - 5, 100, 60);
           }
           
           doc.setFont("helvetica", "bold");
