@@ -995,9 +995,20 @@ const BottomNav = ({ currentView, setView, user }: { currentView: View, setView:
 
 const Header = ({ onToggleSidebar, isSidebarOpen, profile, onLogout, onEditProfile, user }: { onToggleSidebar: () => void, isSidebarOpen: boolean, profile: UserProfile, onLogout: () => void, onEditProfile: () => void, user: AuthUser | null }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
   const displayName = user?.role === 'GUEST' ? 'Tamu' : profile.name;
   const displayInitials = user?.role === 'GUEST' ? 'T' : profile.initials;
   const displayTitle = user?.role === 'GUEST' ? 'Pengunjung' : profile.title;
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setIsProfileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <header className="h-16 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 lg:px-8 flex items-center justify-between sticky top-0 z-10">
@@ -1037,54 +1048,58 @@ const Header = ({ onToggleSidebar, isSidebarOpen, profile, onLogout, onEditProfi
           <Search size={20} />
         </button>
         
-        <div className="relative">
+        <div className="relative" ref={profileRef}>
           <button 
-            onClick={() => setIsProfileOpen(!isProfileOpen)}
-            className="w-10 h-10 lg:w-11 lg:h-11 rounded-full bg-blue-100 flex items-center justify-center text-blue-900 font-black text-xs lg:text-sm border-2 border-white shadow-sm hover:shadow-md transition-all active:scale-95"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsProfileOpen(!isProfileOpen);
+            }}
+            className="w-10 h-10 lg:w-11 lg:h-11 rounded-full bg-blue-100 flex items-center justify-center text-blue-900 font-black text-xs lg:text-sm border-2 border-white shadow-sm hover:shadow-md transition-all active:scale-95 relative z-[60]"
           >
             {displayInitials}
           </button>
 
           <AnimatePresence>
             {isProfileOpen && (
-              <>
-                <div className="fixed inset-0 z-20" onClick={() => setIsProfileOpen(false)} />
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                  className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-30"
-                >
-                  <div className="p-4 border-b border-gray-50 bg-gray-50/50">
-                    <p className="text-xs font-black text-gray-900 truncate">{displayName}</p>
-                    <p className="text-[10px] text-blue-600 font-bold uppercase tracking-tighter mt-0.5">{displayTitle}</p>
-                  </div>
-                  <div className="p-2">
-                    {user?.role === 'ADMIN' && (
-                      <button 
-                        onClick={() => {
-                          onEditProfile();
-                          setIsProfileOpen(false);
-                        }}
-                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-gray-600 hover:bg-blue-50 hover:text-blue-900 transition-all"
-                      >
-                        <User size={16} />
-                        Edit Profil
-                      </button>
-                    )}
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[70] origin-top-right"
+              >
+                <div className="p-4 border-b border-gray-50 bg-gray-50/50">
+                  <p className="text-xs font-black text-gray-900 truncate">{displayName}</p>
+                  <p className="text-[10px] text-blue-600 font-bold uppercase tracking-tighter mt-0.5">{displayTitle}</p>
+                </div>
+                <div className="p-2 relative z-[80]">
+                  {user?.role === 'ADMIN' && (
                     <button 
-                      onClick={() => {
-                        onLogout();
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEditProfile();
                         setIsProfileOpen(false);
                       }}
-                      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-red-500 hover:bg-red-50 transition-all"
+                      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-gray-600 hover:bg-blue-50 hover:text-blue-900 transition-all cursor-pointer"
                     >
-                      <LogOut size={16} />
-                      Logout
+                      <User size={16} />
+                      Edit Profil
                     </button>
-                  </div>
-                </motion.div>
-              </>
+                  )}
+                  <button 
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onLogout();
+                      setIsProfileOpen(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-red-500 hover:bg-red-50 transition-all cursor-pointer"
+                  >
+                    <LogOut size={16} />
+                    Logout
+                  </button>
+                </div>
+              </motion.div>
             )}
           </AnimatePresence>
         </div>
