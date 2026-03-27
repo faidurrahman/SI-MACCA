@@ -1011,7 +1011,7 @@ const Header = ({ onToggleSidebar, isSidebarOpen, profile, onLogout, onEditProfi
   }, []);
 
   return (
-    <header className="h-16 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 lg:px-8 flex items-center justify-between sticky top-0 z-10">
+    <header className="h-16 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 lg:px-8 flex items-center justify-between sticky top-0 z-50">
       <div className="flex items-center gap-4">
         <button 
           onClick={onToggleSidebar}
@@ -1050,10 +1050,7 @@ const Header = ({ onToggleSidebar, isSidebarOpen, profile, onLogout, onEditProfi
         
         <div className="relative" ref={profileRef}>
           <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsProfileOpen(!isProfileOpen);
-            }}
+            onClick={() => setIsProfileOpen(!isProfileOpen)}
             className="w-10 h-10 lg:w-11 lg:h-11 rounded-full bg-blue-100 flex items-center justify-center text-blue-900 font-black text-xs lg:text-sm border-2 border-white shadow-sm hover:shadow-md transition-all active:scale-95 relative z-[60]"
           >
             {displayInitials}
@@ -1074,12 +1071,7 @@ const Header = ({ onToggleSidebar, isSidebarOpen, profile, onLogout, onEditProfi
                 <div className="p-2 relative z-[80]">
                   {user?.role === 'ADMIN' && (
                     <button 
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onEditProfile();
-                        setIsProfileOpen(false);
-                      }}
+                      onClick={onEditProfile}
                       className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-gray-600 hover:bg-blue-50 hover:text-blue-900 transition-all cursor-pointer"
                     >
                       <User size={16} />
@@ -1087,12 +1079,7 @@ const Header = ({ onToggleSidebar, isSidebarOpen, profile, onLogout, onEditProfi
                     </button>
                   )}
                   <button 
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onLogout();
-                      setIsProfileOpen(false);
-                    }}
+                    onClick={onLogout}
                     className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-red-500 hover:bg-red-50 transition-all cursor-pointer"
                   >
                     <LogOut size={16} />
