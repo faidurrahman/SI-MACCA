@@ -874,7 +874,7 @@ const AgendaDetailModal = ({ isOpen, onClose, agenda, onEdit }: { isOpen: boolea
   );
 };
 
-const Sidebar = ({ currentView, setView, isOpen, user, profile, onLogout }: { currentView: View, setView: (v: View) => void, isOpen: boolean, user: AuthUser | null, profile: UserProfile, onLogout: () => void }) => {
+const Sidebar = ({ currentView, setView, isOpen, user, profile, onLogout, onEditProfile }: { currentView: View, setView: (v: View) => void, isOpen: boolean, user: AuthUser | null, profile: UserProfile, onLogout: () => void, onEditProfile: () => void }) => {
   const navItems = [
     { id: 'Beranda' as View, icon: Home, label: 'Beranda' },
     { id: 'Jadwal' as View, icon: Calendar, label: 'Jadwal' },
@@ -924,13 +924,30 @@ const Sidebar = ({ currentView, setView, isOpen, user, profile, onLogout }: { cu
 
       <div className="p-4 border-t border-gray-100 w-64">
         <div className="bg-gray-50 rounded-2xl p-4 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-900 font-bold border-2 border-white shadow-sm shrink-0">
-            {profile.initials}
-          </div>
-          <div className="flex-1 min-w-0 overflow-hidden">
-            <p className="text-sm font-bold text-gray-900 truncate">{profile.name}</p>
-            <p className="text-[10px] text-gray-500 truncate uppercase font-bold tracking-tighter">{user?.role || 'GUEST'}</p>
-          </div>
+          {user?.role === 'ADMIN' ? (
+            <button 
+              onClick={onEditProfile}
+              className="flex items-center gap-3 flex-1 min-w-0 text-left hover:opacity-80 transition-opacity"
+            >
+              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-900 font-bold border-2 border-white shadow-sm shrink-0">
+                {profile.initials}
+              </div>
+              <div className="flex-1 min-w-0 overflow-hidden">
+                <p className="text-sm font-bold text-gray-900 truncate">{profile.name}</p>
+                <p className="text-[10px] text-gray-500 truncate uppercase font-bold tracking-tighter">{user?.role || 'GUEST'}</p>
+              </div>
+            </button>
+          ) : (
+            <div className="flex items-center gap-3 flex-1 min-w-0 text-left">
+              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-900 font-bold border-2 border-white shadow-sm shrink-0">
+                T
+              </div>
+              <div className="flex-1 min-w-0 overflow-hidden">
+                <p className="text-sm font-bold text-gray-900 truncate">Tamu</p>
+                <p className="text-[10px] text-gray-500 truncate uppercase font-bold tracking-tighter">Pengunjung</p>
+              </div>
+            </div>
+          )}
           <button 
             onClick={onLogout}
             className="text-gray-400 hover:text-red-500 transition-colors shrink-0"
@@ -978,6 +995,9 @@ const BottomNav = ({ currentView, setView, user }: { currentView: View, setView:
 
 const Header = ({ onToggleSidebar, isSidebarOpen, profile, onLogout, onEditProfile, user }: { onToggleSidebar: () => void, isSidebarOpen: boolean, profile: UserProfile, onLogout: () => void, onEditProfile: () => void, user: AuthUser | null }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const displayName = user?.role === 'GUEST' ? 'Tamu' : profile.name;
+  const displayInitials = user?.role === 'GUEST' ? 'T' : profile.initials;
+  const displayTitle = user?.role === 'GUEST' ? 'Pengunjung' : profile.title;
 
   return (
     <header className="h-16 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 lg:px-8 flex items-center justify-between sticky top-0 z-10">
@@ -1022,7 +1042,7 @@ const Header = ({ onToggleSidebar, isSidebarOpen, profile, onLogout, onEditProfi
             onClick={() => setIsProfileOpen(!isProfileOpen)}
             className="w-10 h-10 lg:w-11 lg:h-11 rounded-full bg-blue-100 flex items-center justify-center text-blue-900 font-black text-xs lg:text-sm border-2 border-white shadow-sm hover:shadow-md transition-all active:scale-95"
           >
-            {profile.initials}
+            {displayInitials}
           </button>
 
           <AnimatePresence>
@@ -1036,8 +1056,8 @@ const Header = ({ onToggleSidebar, isSidebarOpen, profile, onLogout, onEditProfi
                   className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-30"
                 >
                   <div className="p-4 border-b border-gray-50 bg-gray-50/50">
-                    <p className="text-xs font-black text-gray-900 truncate">{profile.name}</p>
-                    <p className="text-[10px] text-blue-600 font-bold uppercase tracking-tighter mt-0.5">{profile.title}</p>
+                    <p className="text-xs font-black text-gray-900 truncate">{displayName}</p>
+                    <p className="text-[10px] text-blue-600 font-bold uppercase tracking-tighter mt-0.5">{displayTitle}</p>
                   </div>
                   <div className="p-2">
                     {user?.role === 'ADMIN' && (
@@ -1120,8 +1140,8 @@ const BerandaView = ({ setView, onAddAgenda, currentTime, onSelectAgenda, onEdit
           <div className="flex flex-col items-center text-center gap-6 lg:gap-8">
             <div className="space-y-2">
               <h2 className="text-lg lg:text-xl font-bold opacity-80 tracking-tight">Selamat Datang,</h2>
-              <h3 className="text-2xl lg:text-4xl font-black tracking-tighter leading-tight">{profile.name}</h3>
-              <p className="text-xs lg:text-sm font-bold text-blue-300 uppercase tracking-widest">{profile.title}</p>
+              <h3 className="text-2xl lg:text-4xl font-black tracking-tighter leading-tight">{user?.role === 'GUEST' ? 'Tamu' : profile.name}</h3>
+              <p className="text-xs lg:text-sm font-bold text-blue-300 uppercase tracking-widest">{user?.role === 'GUEST' ? 'Pengunjung' : profile.title}</p>
             </div>
             <div className="bg-white/10 backdrop-blur-xl rounded-2xl px-5 py-3 border border-white/10 w-fit mx-auto">
               <p className="text-xs lg:text-sm font-bold tracking-wide opacity-90">{formattedDate}</p>
@@ -2005,9 +2025,9 @@ export default function App() {
   const [view, setView] = useState<View>('Login');
   const [user, setUser] = useState<AuthUser | null>(null);
   const [profile, setProfile] = useState<UserProfile>({
-    name: 'Nanin Sudiar, A.P.',
-    title: 'Camat Ujung Pandang',
-    initials: 'NS'
+    name: 'Azizah Nur Fatima Azzahra, S.Kom',
+    title: 'Admin',
+    initials: 'Sisi'
   });
   const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -2045,8 +2065,21 @@ export default function App() {
   };
 
   const handleLogout = () => {
-    setUser(null);
-    setView('Login');
+    Swal.fire({
+      title: 'Konfirmasi Logout',
+      text: 'Apakah Anda yakin ingin keluar dari aplikasi?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#1e3a8a',
+      confirmButtonText: 'Ya, Logout',
+      cancelButtonText: 'Batal'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setUser(null);
+        setView('Login');
+      }
+    });
   };
 
   const handleUpdateProfile = (newProfile: UserProfile) => {
@@ -2195,6 +2228,7 @@ export default function App() {
         user={user} 
         profile={profile} 
         onLogout={handleLogout} 
+        onEditProfile={() => setIsEditProfileModalOpen(true)}
       />
 
       {/* Bottom Nav (Mobile) */}
