@@ -137,7 +137,7 @@ const LoginView = ({ onLogin, onGuestAccess }: { onLogin: (u: string, p: string)
               M
             </div>
             <h1 className="text-2xl font-black text-gray-900 tracking-tight uppercase">SI-MACCA</h1>
-            <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Sistem Informasi Manajemen Agenda Camat Cepat & Akurat</p>
+            <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Sistem Informasi Manajemen Agenda Kecamatan Cepat & Akurat</p>
           </div>
 
           <div className="space-y-4">
