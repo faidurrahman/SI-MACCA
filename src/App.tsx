@@ -368,13 +368,132 @@ const AgendaModal = ({ isOpen, onClose, agenda = null, onRefresh }: { isOpen: bo
       return;
     }
 
+    // Fungsi untuk menstandarkan format tanggal menjadi YYYY-MM-DD
+    const standardizeDate = (inputDate: string) => {
+      if (!inputDate) return '';
+      
+      let year, month, day;
+
+      // Jika format YYYY-MM-DD (standar HTML5 input date)
+      if (/^\d{4}-\d{2}-\d{2}$/.test(inputDate)) {
+        return inputDate;
+      }
+      
+      // Jika format mengandung '/' (misal: DD/MM/YYYY atau MM/DD/YYYY)
+      if (inputDate.includes('/')) {
+        const parts = inputDate.split('/');
+        if (parts.length === 3) {
+          const p1 = parseInt(parts[0], 10);
+          const p2 = parseInt(parts[1], 10);
+          const p3 = parseInt(parts[2], 10);
+          
+          if (p3 > 1000) {
+            year = p3;
+            // Jika p1 > 12, pasti DD/MM/YYYY
+            if (p1 > 12) {
+              day = p1;
+              month = p2;
+            } 
+            // Jika p2 > 12, pasti MM/DD/YYYY
+            else if (p2 > 12) {
+              month = p1;
+              day = p2;
+            } 
+            // Jika ambigu (misal 05/06/2026), asumsikan DD/MM/YYYY (standar Indonesia)
+            else {
+              day = p1;
+              month = p2;
+            }
+          } else if (p1 > 1000) { // YYYY/MM/DD
+            year = p1;
+            month = p2;
+            day = p3;
+          } else {
+            return inputDate; // Format tidak dikenali
+          }
+          
+          return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        }
+      }
+      
+      // Jika format mengandung '-' tapi bukan YYYY-MM-DD (misal DD-MM-YYYY)
+      if (inputDate.includes('-')) {
+        const parts = inputDate.split('-');
+        if (parts.length === 3) {
+          const p1 = parseInt(parts[0], 10);
+          const p2 = parseInt(parts[1], 10);
+          const p3 = parseInt(parts[2], 10);
+          
+          if (p3 > 1000) {
+            year = p3;
+            if (p1 > 12) { day = p1; month = p2; }
+            else if (p2 > 12) { month = p1; day = p2; }
+            else { day = p1; month = p2; }
+          } else if (p1 > 1000) {
+            year = p1; month = p2; day = p3;
+          } else {
+            return inputDate;
+          }
+          return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        }
+      }
+      
+      // Fallback menggunakan objek Date bawaan JS (menangani "30 Mar 2026", dll)
+      const parsedDate = new Date(inputDate);
+      if (!isNaN(parsedDate.getTime())) {
+        year = parsedDate.getFullYear();
+        month = String(parsedDate.getMonth() + 1).padStart(2, '0');
+        day = String(parsedDate.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      }
+      
+      return inputDate;
+    };
+
+    // Fungsi untuk menstandarkan format waktu menjadi HH:mm (24 jam)
+    const standardizeTime = (inputTime: string) => {
+      if (!inputTime) return '';
+      
+      // Ubah pemisah titik menjadi titik dua dan bersihkan spasi
+      let timeStr = inputTime.replace(/\./g, ':').trim().toUpperCase();
+      
+      // Cek format AM/PM
+      const hasPM = timeStr.includes('PM');
+      const hasAM = timeStr.includes('AM');
+      
+      // Hapus teks AM/PM
+      timeStr = timeStr.replace(/AM|PM/g, '').trim();
+      
+      const parts = timeStr.split(':');
+      if (parts.length >= 2) {
+        let hours = parseInt(parts[0], 10);
+        const minutes = parseInt(parts[1], 10);
+        
+        if (isNaN(hours) || isNaN(minutes)) return inputTime;
+        
+        // Konversi ke 24 jam
+        if (hasPM && hours < 12) {
+          hours += 12;
+        } else if (hasAM && hours === 12) {
+          hours = 0;
+        }
+        
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+      }
+      
+      return inputTime;
+    };
+
+    const safeDate = standardizeDate(date);
+    const safeTime = standardizeTime(time);
+
     setIsSubmitting(true);
     try {
       const payload = {
         action: agenda ? 'UPDATE' : 'CREATE',
         id: agenda?.id || `AGD-${Date.now()}`,
-        tanggal: date,
-        waktu: time,
+        tanggal: safeDate,
+        waktu: safeTime,
         nama_kegiatan: title,
         penyelenggara: organizer,
         lokasi: location, // Swapped to match sheet column order
