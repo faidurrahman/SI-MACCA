@@ -1,4 +1,4 @@
-export const API_URL = "https://script.google.com/macros/s/AKfycbwo-CksvHtqxXBC4y_fzchWqmDSpcdCfQFdE13Tly_VScYLDJNmJ95Dxh2oeFrHFAW54w/exec";
+export const API_URL = "https://script.google.com/macros/s/AKfycbzvKtfVUWqOc8nal00dWa1TcL_LX3y1-cLr8GlEpVrISJsnUFDgNqqci-p7lsd8OTbp6Q/exec";
 
 export const DISPOSISI_OPTIONS = [
   "SEKCAM",

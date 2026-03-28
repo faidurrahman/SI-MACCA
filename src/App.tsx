@@ -582,7 +582,7 @@ const AgendaModal = ({ isOpen, onClose, agenda = null, onRefresh }: { isOpen: bo
           </div>
 
           {/* Form Content */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6 no-scrollbar">
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
             {/* Nama Kegiatan */}
             <div className="space-y-2">
               <label className="text-[10px] font-black text-blue-900/40 uppercase tracking-widest ml-1">Nama Kegiatan</label>
@@ -1405,7 +1405,7 @@ const BerandaView = ({ setView, onAddAgenda, currentTime, onSelectAgenda, onEdit
   );
 };
 
-const JadwalView = ({ currentTime, onSelectAgenda, onEditAgenda, onDeleteAgenda, agendas, fetchAgendas, isLoading, user }: { currentTime: Date, onSelectAgenda: (a: AgendaItem) => void, onEditAgenda: (a: AgendaItem) => void, onDeleteAgenda: (id: string) => void, agendas: AgendaItem[], fetchAgendas: () => void, isLoading: boolean, user: AuthUser | null }) => {
+const JadwalView = ({ currentTime, onSelectAgenda, onEditAgenda, onDeleteAgenda, agendas, fetchAgendas, isLoading, user, deletingId }: { currentTime: Date, onSelectAgenda: (a: AgendaItem) => void, onEditAgenda: (a: AgendaItem) => void, onDeleteAgenda: (id: string) => void, agendas: AgendaItem[], fetchAgendas: () => void, isLoading: boolean, user: AuthUser | null, deletingId: string | null }) => {
   const [filter, setFilter] = useState<string>('SEMUA');
   const [selectedDate, setSelectedDate] = useState<Date>(new Date(currentTime));
   const [displayedMonth, setDisplayedMonth] = useState<string>(
@@ -1692,11 +1692,12 @@ const JadwalView = ({ currentTime, onSelectAgenda, onEditAgenda, onDeleteAgenda,
                       e.stopPropagation();
                       onDeleteAgenda(agenda.id);
                     }}
-                    className="flex items-center justify-center gap-2 bg-red-50 text-red-500 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all duration-200 shadow-sm"
+                    disabled={deletingId === agenda.id}
+                    className="flex items-center justify-center gap-2 bg-red-50 text-red-500 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all duration-200 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     title="Hapus Jadwal"
                   >
                     <Trash2 size={14} />
-                    HAPUS
+                    {deletingId === agenda.id ? 'MENGHAPUS...' : 'HAPUS'}
                   </button>
                 )}
                 <button 
@@ -2158,6 +2159,7 @@ export default function App() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [agendas, setAgendas] = useState<AgendaItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [lastSync, setLastSync] = useState<Date | null>(null);
 
   const handleLogin = (u: string, p: string) => {
@@ -2303,7 +2305,7 @@ export default function App() {
     
     const result = await Swal.fire({
       title: 'Apakah Anda yakin?',
-      text: "Data jadwal yang dihapus tidak dapat dikembalikan!",
+      text: "Apakah Anda yakin ingin menghapus agenda ini?",
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
@@ -2313,12 +2315,42 @@ export default function App() {
     });
 
     if (result.isConfirmed) {
-      setAgendas(prev => prev.filter(a => a.id !== id));
-      await Swal.fire(
-        'Terhapus!',
-        'Jadwal berhasil dihapus.',
-        'success'
-      );
+      setDeletingId(id);
+      try {
+        const payload = {
+          action: 'DELETE',
+          id: id
+        };
+
+        await fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: {
+            'Content-Type': 'text/plain',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        setAgendas(prev => prev.filter(a => a.id !== id));
+        
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil',
+          text: 'Agenda berhasil dihapus',
+          timer: 2000,
+          showConfirmButton: false
+        });
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Gagal',
+          text: 'Gagal menghapus agenda',
+          timer: 2000,
+          showConfirmButton: false
+        });
+      } finally {
+        setDeletingId(null);
+      }
     }
   };
 
@@ -2394,6 +2426,7 @@ export default function App() {
                 fetchAgendas={fetchAgendas}
                 isLoading={isLoading}
                 user={user}
+                deletingId={deletingId}
               />
             )}
             {view === 'Laporan' && (
