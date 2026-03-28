@@ -866,7 +866,7 @@ const AgendaDetailModal = ({ isOpen, onClose, agenda, onEdit }: { isOpen: boolea
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto p-8 space-y-8 no-scrollbar">
+          <div className="flex-1 overflow-y-auto p-8 space-y-8">
             {/* Title Section */}
             <div className="space-y-2">
               <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${
