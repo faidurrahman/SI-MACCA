@@ -819,6 +819,56 @@ const AgendaDetailModal = ({ isOpen, onClose, agenda, onEdit }: { isOpen: boolea
     return `${timeStr} WITA`;
   };
 
+  const handleDownloadPdf = () => {
+    const doc = new jsPDF();
+    
+    // Add title
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text('DETAIL AGENDA', 14, 20);
+    
+    // Add ID and Status
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100);
+    doc.text(`${agenda.id} • ${agenda.status}`, 14, 28);
+    
+    // Add Main Title
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0);
+    const splitTitle = doc.splitTextToSize(agenda.title, 180);
+    doc.text(splitTitle, 14, 40);
+    
+    let yPos = 40 + (splitTitle.length * 7) + 5;
+    
+    // Add Details Table
+    const tableData = [
+      ['Waktu & Tanggal', `${formatTime(agenda.time)} • ${formatDate(agenda.date)}`],
+      ['Lokasi', agenda.location || '-'],
+      ['Pakaian', agenda.dressCode || '-'],
+      ['Penyelenggara', agenda.organizer || '-'],
+      ['Keterangan', agenda.notes || 'Tidak ada keterangan tambahan.'],
+    ];
+
+    if (agenda.disposisiTo && agenda.disposisiTo.length > 0) {
+      tableData.push(['Disposisi Ke', agenda.disposisiTo.join(', ')]);
+    }
+
+    autoTable(doc, {
+      startY: yPos,
+      body: tableData,
+      theme: 'plain',
+      styles: { fontSize: 11, cellPadding: 3 },
+      columnStyles: {
+        0: { fontStyle: 'bold', cellWidth: 40, textColor: [100, 100, 100] },
+        1: { cellWidth: 140 }
+      }
+    });
+
+    doc.save(`Agenda_${agenda.id}.pdf`);
+  };
+
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 lg:p-8">
@@ -975,6 +1025,7 @@ const AgendaDetailModal = ({ isOpen, onClose, agenda, onEdit }: { isOpen: boolea
           {/* Footer */}
           <div className="p-6 bg-gray-50/50 border-t border-gray-100 flex gap-4">
             <button 
+              onClick={handleDownloadPdf}
               className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
             >
               <Download size={18} />
