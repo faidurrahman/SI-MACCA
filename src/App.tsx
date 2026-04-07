@@ -1982,8 +1982,15 @@ const LaporanView = ({ setView, agendas }: { setView: (v: View) => void, agendas
         doc.text(`: ${getIndoDay(dateKey)}`, pageWidth / 2 - 10, 35);
         doc.text(`: ${getIndoMonth(dateKey)}`, pageWidth / 2 - 10, 40);
 
+        // Sort items by time
+        const sortedItems = groupedData[dateKey].sort((a, b) => {
+          const timeA = a.time || '23:59';
+          const timeB = b.time || '23:59';
+          return timeA.localeCompare(timeB);
+        });
+
         // Table
-        const tableData = groupedData[dateKey].map((item, i) => [
+        const tableData = sortedItems.map((item, i) => [
           i + 1,
           item.time ? item.time.split(' ')[0] : '-',
           item.title || '-',

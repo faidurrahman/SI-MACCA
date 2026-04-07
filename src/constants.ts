@@ -3,7 +3,7 @@ export const API_URL = "https://script.google.com/macros/s/AKfycbzvKtfVUWqOc8nal
 export const DISPOSISI_OPTIONS = [
   "SEKCAM",
   "KASI PEMERINTAHAN",
-  "KASI TRANTIBUN",
+  "KASI TRANTIB",
   "KASI KESRA",
   "KASI EKBANG",
   "KASI KEBERSIHAN",
