@@ -31,7 +31,9 @@ import {
   Filter,
   ArrowRight,
   CalendarRange,
-  Trash2
+  Trash2,
+  Eye,
+  List
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Swal from 'sweetalert2';
@@ -1786,6 +1788,94 @@ const LaporanView = ({ setView, agendas }: { setView: (v: View) => void, agendas
   const [endDate, setEndDate] = useState('');
   const [error, setError] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  const [previewData, setPreviewData] = useState<{ [key: string]: AgendaItem[] }>({});
+  const [hasPreviewData, setHasPreviewData] = useState(false);
+
+  // Helper for Indonesian Day Name
+  const getIndoDay = (dateStr: string) => {
+    const days = ['MINGGU', 'SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', 'SABTU'];
+    const [y, m, d] = dateStr.split('-');
+    const date = new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+    return !isNaN(date.getTime()) ? days[date.getDay()] : '-';
+  };
+
+  // Helper for Indonesian Month Name
+  const getIndoMonth = (dateStr: string) => {
+    const months = [
+      'JANUARI', 'FEBRUARI', 'MARET', 'APRIL', 'MEI', 'JUNI',
+      'JULI', 'AGUSTUS', 'SEPTEMBER', 'OKTOBER', 'NOVEMBER', 'DESEMBER'
+    ];
+    const [y, m, d] = dateStr.split('-');
+    const date = new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+    if (isNaN(date.getTime())) return '-';
+    return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+  };
+
+  const getFilteredAndGroupedData = () => {
+    const filteredData = agendas.filter(item => {
+      if (!item.rawDate) return false;
+      let rawDate = item.rawDate.trim();
+      
+      if (/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) {
+         return rawDate >= startDate && rawDate <= endDate;
+      }
+
+      let d = new Date(rawDate);
+      if (isNaN(d.getTime())) {
+        const parts = rawDate.split(/[-/]/);
+        if (parts.length === 3 && parts[2].length === 4) {
+           const day = parseInt(parts[0]);
+           const month = parseInt(parts[1]) - 1;
+           const year = parseInt(parts[2]);
+           d = new Date(year, month, day);
+        }
+      }
+
+      if (isNaN(d.getTime())) return false;
+      
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const itemDateKey = `${year}-${month}-${day}`;
+      
+      return itemDateKey >= startDate && itemDateKey <= endDate;
+    });
+
+    const groupedData: { [key: string]: AgendaItem[] } = {};
+    filteredData.forEach(item => {
+      if (!item.rawDate) return;
+      let rawDate = item.rawDate.trim();
+      let dateKey = '';
+
+      if (/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) {
+         dateKey = rawDate;
+      } else {
+         let d = new Date(rawDate);
+         if (isNaN(d.getTime())) {
+            const parts = rawDate.split(/[-/]/);
+            if (parts.length === 3 && parts[2].length === 4) {
+               const day = parseInt(parts[0]);
+               const month = parseInt(parts[1]) - 1;
+               const year = parseInt(parts[2]);
+               d = new Date(year, month, day);
+            }
+         }
+         if (!isNaN(d.getTime())) {
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            dateKey = `${year}-${month}-${day}`;
+         }
+      }
+      
+      if (!dateKey) return;
+      if (!groupedData[dateKey]) groupedData[dateKey] = [];
+      groupedData[dateKey].push(item);
+    });
+
+    return { filteredData, groupedData };
+  };
 
   const validateRange = () => {
     if (!startDate || !endDate) {
@@ -1814,47 +1904,39 @@ const LaporanView = ({ setView, agendas }: { setView: (v: View) => void, agendas
     return true;
   };
 
+  const handleShowPreview = async () => {
+    if (!validateRange()) return;
+
+    setIsLoadingPreview(true);
+    
+    // Simulate slight network delay for UX as requested
+    await new Promise(resolve => setTimeout(resolve, 600));
+    
+    const { filteredData, groupedData } = getFilteredAndGroupedData();
+    
+    if (filteredData.length === 0) {
+      Swal.fire({
+        icon: 'info',
+        title: 'Data Kosong',
+        text: 'Tidak ada agenda ditemukan pada rentang tanggal tersebut.',
+        confirmButtonColor: '#1e3a8a'
+      });
+      setHasPreviewData(false);
+      setPreviewData({});
+    } else {
+      setPreviewData(groupedData);
+      setHasPreviewData(true);
+    }
+    
+    setIsLoadingPreview(false);
+  };
+
   const handleGenerate = async () => {
     if (!validateRange()) return;
 
     setIsGenerating(true);
     try {
-      // Filter data locally from agendas prop using string comparison to avoid timezone shifts
-      const filteredData = agendas.filter(item => {
-        if (!item.rawDate) return false;
-        let rawDate = item.rawDate.trim();
-        
-        // If it's exactly YYYY-MM-DD, use it directly
-        if (/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) {
-           const itemDateKey = rawDate;
-           return itemDateKey >= startDate && itemDateKey <= endDate;
-        }
-
-        let d = new Date(rawDate);
-        
-        // Fallback for DD-MM-YYYY or DD/MM/YYYY if standard parse fails
-        if (isNaN(d.getTime())) {
-          const parts = rawDate.split(/[-/]/);
-          if (parts.length === 3) {
-            // Check if it looks like D-M-Y (year is last)
-            if (parts[2].length === 4) {
-               const day = parseInt(parts[0]);
-               const month = parseInt(parts[1]) - 1;
-               const year = parseInt(parts[2]);
-               d = new Date(year, month, day);
-            }
-          }
-        }
-
-        if (isNaN(d.getTime())) return false;
-        
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        const itemDateKey = `${year}-${month}-${day}`;
-        
-        return itemDateKey >= startDate && itemDateKey <= endDate;
-      });
+      const { filteredData, groupedData } = getFilteredAndGroupedData();
 
       if (filteredData.length === 0) {
         Swal.fire({
@@ -1887,60 +1969,6 @@ const LaporanView = ({ setView, agendas }: { setView: (v: View) => void, agendas
         orientation: 'landscape',
         unit: 'mm',
         format: 'a4'
-      });
-
-      // Helper for Indonesian Day Name
-      const getIndoDay = (dateStr: string) => {
-        const days = ['MINGGU', 'SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', 'SABTU'];
-        const [y, m, d] = dateStr.split('-');
-        const date = new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
-        return !isNaN(date.getTime()) ? days[date.getDay()] : '-';
-      };
-
-      // Helper for Indonesian Month Name
-      const getIndoMonth = (dateStr: string) => {
-        const months = [
-          'JANUARI', 'FEBRUARI', 'MARET', 'APRIL', 'MEI', 'JUNI',
-          'JULI', 'AGUSTUS', 'SEPTEMBER', 'OKTOBER', 'NOVEMBER', 'DESEMBER'
-        ];
-        const [y, m, d] = dateStr.split('-');
-        const date = new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
-        if (isNaN(date.getTime())) return '-';
-        return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
-      };
-
-      // Group data by date (using YYYY-MM-DD for consistent grouping)
-      const groupedData: { [key: string]: any[] } = {};
-      filteredData.forEach(item => {
-        if (!item.rawDate) return;
-        let rawDate = item.rawDate.trim();
-        let dateKey = '';
-
-        if (/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) {
-           dateKey = rawDate;
-        } else {
-           let d = new Date(rawDate);
-           if (isNaN(d.getTime())) {
-              const parts = rawDate.split(/[-/]/);
-              if (parts.length === 3 && parts[2].length === 4) {
-                 const day = parseInt(parts[0]);
-                 const month = parseInt(parts[1]) - 1;
-                 const year = parseInt(parts[2]);
-                 d = new Date(year, month, day);
-              }
-           }
-           if (!isNaN(d.getTime())) {
-              const year = d.getFullYear();
-              const month = String(d.getMonth() + 1).padStart(2, '0');
-              const day = String(d.getDate()).padStart(2, '0');
-              dateKey = `${year}-${month}-${day}`;
-           }
-        }
-        
-        if (!dateKey) return;
-        
-        if (!groupedData[dateKey]) groupedData[dateKey] = [];
-        groupedData[dateKey].push(item);
       });
 
       const sortedDates = Object.keys(groupedData).sort();
@@ -2154,8 +2182,26 @@ const LaporanView = ({ setView, agendas }: { setView: (v: View) => void, agendas
 
         <div className="pt-4 border-t border-gray-50 flex flex-col sm:flex-row items-center gap-4">
           <button 
+            onClick={handleShowPreview}
+            disabled={isLoadingPreview || isGenerating}
+            className={`flex-1 w-full sm:w-auto bg-blue-50 text-blue-900 py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-sm flex items-center justify-center gap-3 transition-all active:scale-[0.98] ${isLoadingPreview ? 'opacity-70 cursor-not-allowed' : 'hover:bg-blue-100'}`}
+          >
+            {isLoadingPreview ? (
+              <>
+                <div className="w-4 h-4 border-2 border-blue-900/30 border-t-blue-900 rounded-full animate-spin"></div>
+                Memuat...
+              </>
+            ) : (
+              <>
+                <List size={18} />
+                Tampilkan Laporan
+              </>
+            )}
+          </button>
+          
+          <button 
             onClick={handleGenerate}
-            disabled={isGenerating}
+            disabled={isGenerating || isLoadingPreview}
             className={`flex-1 w-full sm:w-auto bg-blue-900 text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-900/20 flex items-center justify-center gap-3 transition-all active:scale-[0.98] ${isGenerating ? 'opacity-70 cursor-not-allowed' : 'hover:bg-blue-800'}`}
           >
             {isGenerating ? (
@@ -2172,6 +2218,72 @@ const LaporanView = ({ setView, agendas }: { setView: (v: View) => void, agendas
           </button>
         </div>
       </div>
+
+      {hasPreviewData && (
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white border border-gray-100 rounded-[2.5rem] p-4 lg:p-8 shadow-sm flex flex-col gap-6"
+        >
+          <div className="flex items-center gap-3 px-2">
+            <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
+              <Eye size={20} />
+            </div>
+            <div>
+              <h3 className="text-base font-black text-blue-900 uppercase">Preview Data</h3>
+              <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Menampilkan data laporan</p>
+            </div>
+          </div>
+          
+          {Object.keys(previewData).sort().map(dateKey => {
+            const items = previewData[dateKey].sort((a, b) => (a.time || '23:59').localeCompare(b.time || '23:59'));
+            return (
+              <div key={dateKey} className="space-y-3">
+                <div className="bg-gray-50 px-4 py-2 rounded-xl inline-block border border-gray-100">
+                  <span className="text-xs font-black text-gray-700 tracking-wider">
+                    {getIndoDay(dateKey)}, {getIndoMonth(dateKey)}
+                  </span>
+                </div>
+                
+                <div className="overflow-x-auto no-scrollbar pb-2 rounded-2xl border border-gray-100">
+                  <table className="w-full text-left border-collapse min-w-[600px] text-xs">
+                    <thead>
+                      <tr className="bg-gray-50/80">
+                        <th className="py-3 px-4 font-black text-[10px] uppercase tracking-widest text-gray-500 border-b border-gray-100 w-12 text-center">No</th>
+                        <th className="py-3 px-4 font-black text-[10px] uppercase tracking-widest text-gray-500 border-b border-gray-100 w-24">Waktu</th>
+                        <th className="py-3 px-4 font-black text-[10px] uppercase tracking-widest text-gray-500 border-b border-gray-100 min-w-[150px]">Kegiatan</th>
+                        <th className="py-3 px-4 font-black text-[10px] uppercase tracking-widest text-gray-500 border-b border-gray-100">Lokasi</th>
+                        <th className="py-3 px-4 font-black text-[10px] uppercase tracking-widest text-gray-500 border-b border-gray-100">Pakaian</th>
+                        <th className="py-3 px-4 font-black text-[10px] uppercase tracking-widest text-gray-500 border-b border-gray-100 min-w-[100px]">Disposisi</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50">
+                      {items.map((item, idx) => (
+                        <tr key={item.id} className="hover:bg-blue-50/30 transition-colors">
+                          <td className="py-3 px-4 font-bold text-gray-400 text-center">{idx + 1}</td>
+                          <td className="py-3 px-4 font-bold text-blue-600">{item.time || '-'}</td>
+                          <td className="py-3 px-4 font-bold text-gray-800 leading-relaxed">{item.title || '-'}</td>
+                          <td className="py-3 px-4 font-medium text-gray-600">{item.location || '-'}</td>
+                          <td className="py-3 px-4 font-medium text-gray-600">{item.dressCode || '-'}</td>
+                          <td className="py-3 px-4">
+                            {item.disposisiTo && item.disposisiTo.length > 0 ? (
+                              <div className="flex flex-wrap gap-1">
+                                {item.disposisiTo.map(d => (
+                                  <span key={d} className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-tight">{d}</span>
+                                ))}
+                              </div>
+                            ) : '-'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            );
+          })}
+        </motion.div>
+      )}
 
       <div className="bg-blue-50/50 rounded-[2rem] p-8 border border-blue-100/50">
         <div className="flex items-start gap-4">
