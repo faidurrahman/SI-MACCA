@@ -277,6 +277,7 @@ const AgendaModal = ({ isOpen, onClose, agenda = null, onRefresh }: { isOpen: bo
   const [organizer, setOrganizer] = useState('');
   const [location, setLocation] = useState('');
   const [dressCode, setDressCode] = useState('');
+  const [customDressCode, setCustomDressCode] = useState('');
   const [notes, setNotes] = useState('');
   const [selectedDisposisi, setSelectedDisposisi] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -308,7 +309,17 @@ const AgendaModal = ({ isOpen, onClose, agenda = null, onRefresh }: { isOpen: bo
       setTitle(agenda.title);
       setOrganizer(agenda.organizer || '');
       setLocation(agenda.location || '');
-      setDressCode(agenda.dressCode || '');
+      
+      const defaultDressCodes = ["PDH", "PUTIH", "BATIK", "KORPRI", "BEBAS RAPI"];
+      const upperDress = (agenda.dressCode || '').toUpperCase();
+      if (agenda.dressCode && !defaultDressCodes.includes(upperDress)) {
+        setDressCode('LAINNYA');
+        setCustomDressCode(agenda.dressCode);
+      } else {
+        setDressCode(upperDress);
+        setCustomDressCode('');
+      }
+
       setNotes(agenda.notes || '');
       setSelectedDisposisi(agenda.disposisiTo || []);
       setFile(null);
@@ -351,6 +362,7 @@ const AgendaModal = ({ isOpen, onClose, agenda = null, onRefresh }: { isOpen: bo
       setOrganizer('');
       setLocation('');
       setDressCode('');
+      setCustomDressCode('');
       setNotes('');
       setSelectedDisposisi([]);
       setFile(null);
@@ -500,7 +512,7 @@ const AgendaModal = ({ isOpen, onClose, agenda = null, onRefresh }: { isOpen: bo
         penyelenggara: organizer,
         lokasi: location, // Swapped to match sheet column order
         status: status,   // Swapped to match sheet column order
-        pakaian: dressCode,
+        pakaian: dressCode === 'LAINNYA' ? customDressCode : dressCode,
         keterangan: notes,
         disposisi_ke: selectedDisposisi.join(', '),
         fileData: file?.data || "",
@@ -675,20 +687,39 @@ const AgendaModal = ({ isOpen, onClose, agenda = null, onRefresh }: { isOpen: bo
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-blue-900/40 uppercase tracking-widest ml-1">Pakaian</label>
-                <div className="relative flex items-center">
-                  <select 
-                    value={dressCode}
-                    onChange={(e) => setDressCode(e.target.value)}
-                    className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-sm font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-900/5 transition-all appearance-none cursor-pointer"
-                  >
-                    <option value="" disabled>Pilih Pakaian...</option>
-                    <option value="PDH">Pdh</option>
-                    <option value="PUTIH">Putih</option>
-                    <option value="BATIK">Batik</option>
-                    <option value="KORPRI">Korpri</option>
-                    <option value="BEBAS RAPI">Bebas Rapi</option>
-                  </select>
-                  <ChevronDown size={18} className="absolute right-4 text-gray-400 pointer-events-none" />
+                <div className="space-y-3">
+                  <div className="relative flex items-center">
+                    <select 
+                      value={dressCode}
+                      onChange={(e) => setDressCode(e.target.value)}
+                      className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-sm font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-900/5 transition-all appearance-none cursor-pointer"
+                    >
+                      <option value="" disabled>Pilih Pakaian...</option>
+                      <option value="PDH">Pdh</option>
+                      <option value="PUTIH">Putih</option>
+                      <option value="BATIK">Batik</option>
+                      <option value="KORPRI">Korpri</option>
+                      <option value="BEBAS RAPI">Bebas Rapi</option>
+                      <option value="LAINNYA">Lainnya...</option>
+                    </select>
+                    <ChevronDown size={18} className="absolute right-4 text-gray-400 pointer-events-none" />
+                  </div>
+                  
+                  {dressCode === 'LAINNYA' && (
+                    <motion.div 
+                      initial={{ opacity: 0, height: 0 }} 
+                      animate={{ opacity: 1, height: 'auto' }}
+                      className="relative"
+                    >
+                      <input 
+                        type="text" 
+                        value={customDressCode}
+                        onChange={(e) => setCustomDressCode(e.target.value)}
+                        placeholder="Ketik pakaian lainnya..." 
+                        className="w-full bg-gray-50 border border-blue-200 rounded-2xl px-5 py-4 text-sm font-bold text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-900/10 transition-all"
+                      />
+                    </motion.div>
+                  )}
                 </div>
               </div>
             </div>
