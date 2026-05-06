@@ -280,6 +280,8 @@ const AgendaModal = ({ isOpen, onClose, agenda = null, onRefresh }: { isOpen: bo
   const [customDressCode, setCustomDressCode] = useState('');
   const [notes, setNotes] = useState('');
   const [selectedDisposisi, setSelectedDisposisi] = useState<string[]>([]);
+  const [isLainnyaChecked, setIsLainnyaChecked] = useState(false);
+  const [customDisposisiText, setCustomDisposisiText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [file, setFile] = useState<{ data: string, name: string } | null>(null);
   
@@ -321,7 +323,21 @@ const AgendaModal = ({ isOpen, onClose, agenda = null, onRefresh }: { isOpen: bo
       }
 
       setNotes(agenda.notes || '');
-      setSelectedDisposisi(agenda.disposisiTo || []);
+      
+      const defaultDisps = DISPOSISI_OPTIONS;
+      const existingDisps = agenda.disposisiTo || [];
+      const standardSelected = existingDisps.filter(d => defaultDisps.includes(d));
+      const customDisps = existingDisps.filter(d => !defaultDisps.includes(d));
+      
+      setSelectedDisposisi(standardSelected);
+      if (customDisps.length > 0) {
+        setIsLainnyaChecked(true);
+        setCustomDisposisiText(customDisps.join(', '));
+      } else {
+        setIsLainnyaChecked(false);
+        setCustomDisposisiText('');
+      }
+
       setFile(null);
 
       // Parse time (e.g., "09:00 WITA" -> "09:00")
@@ -365,6 +381,8 @@ const AgendaModal = ({ isOpen, onClose, agenda = null, onRefresh }: { isOpen: bo
       setCustomDressCode('');
       setNotes('');
       setSelectedDisposisi([]);
+      setIsLainnyaChecked(false);
+      setCustomDisposisiText('');
       setFile(null);
       setDate('');
       setTime('');
@@ -514,7 +532,7 @@ const AgendaModal = ({ isOpen, onClose, agenda = null, onRefresh }: { isOpen: bo
         status: status,   // Swapped to match sheet column order
         pakaian: dressCode === 'LAINNYA' ? customDressCode : dressCode,
         keterangan: notes,
-        disposisi_ke: selectedDisposisi.join(', '),
+        disposisi_ke: [...selectedDisposisi, ...(isLainnyaChecked && customDisposisiText.trim() ? [customDisposisiText.trim()] : [])].join(', '),
         fileData: file?.data || "",
         fileName: file?.name || "",
         link_undangan: agenda?.linkUndangan || ""
@@ -760,6 +778,38 @@ const AgendaModal = ({ isOpen, onClose, agenda = null, onRefresh }: { isOpen: bo
                     <span className="text-[10px] font-bold text-blue-900/70 uppercase tracking-tight group-hover:text-blue-900 transition-colors">{opt}</span>
                   </label>
                 ))}
+
+                {/* Custom "Lainnya" option */}
+                <div className="space-y-3 pt-2">
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                    <div className="relative flex items-center justify-center">
+                      <input 
+                        type="checkbox" 
+                        checked={isLainnyaChecked}
+                        onChange={(e) => setIsLainnyaChecked(e.target.checked)}
+                        className="peer appearance-none w-5 h-5 border-2 border-gray-200 rounded-md checked:bg-blue-600 checked:border-blue-600 transition-all" 
+                      />
+                      <Check size={12} className="absolute text-white opacity-0 peer-checked:opacity-100 transition-opacity" />
+                    </div>
+                    <span className="text-[10px] font-bold text-blue-900/70 uppercase tracking-tight group-hover:text-blue-900 transition-colors">LAINNYA...</span>
+                  </label>
+                  
+                  {isLainnyaChecked && (
+                    <motion.div 
+                      initial={{ opacity: 0, height: 0 }} 
+                      animate={{ opacity: 1, height: 'auto' }}
+                      className="relative pl-8"
+                    >
+                      <input 
+                        type="text" 
+                        value={customDisposisiText}
+                        onChange={(e) => setCustomDisposisiText(e.target.value)}
+                        placeholder="Ketik disposisi lainnya (pisahkan koma jika lebih dari satu)..." 
+                        className="w-full bg-white border border-blue-200 rounded-xl px-4 py-3 text-xs font-bold text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-900/10 transition-all"
+                      />
+                    </motion.div>
+                  )}
+                </div>
               </div>
             </div>
 
