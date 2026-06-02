@@ -133,55 +133,55 @@ const LoginView = ({ onLogin, onGuestAccess }: { onLogin: (u: string, p: string)
         animate={{ opacity: 1, y: 0 }}
         className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl shadow-blue-900/10 overflow-hidden"
       >
-        <div className="p-8 lg:p-12 space-y-8">
-          <div className="text-center space-y-2">
-            <div className="w-16 h-16 bg-blue-900 rounded-2xl flex items-center justify-center text-white font-black text-3xl mx-auto shadow-xl shadow-blue-900/20 mb-4">
+        <div className="p-8 lg:p-10 space-y-8">
+          <div className="text-center space-y-3">
+            <div className="w-14 h-14 bg-blue-900 rounded-2xl flex items-center justify-center text-white font-bold text-2xl mx-auto shadow-lg shadow-blue-900/20 mb-2">
               M
             </div>
-            <h1 className="text-2xl font-black text-gray-900 tracking-tight uppercase">SI-MACCA</h1>
-            <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Sistem Informasi Manajemen Agenda Kecamatan Cepat & Akurat</p>
+            <h1 className="text-xl font-semibold font-poppins text-gray-900 tracking-wide uppercase">SI-MACCA</h1>
+            <p className="text-[10px] text-gray-500 font-medium uppercase tracking-widest leading-relaxed px-4">Sistem Informasi Manajemen Agenda Kecamatan Cepat & Akurat</p>
           </div>
 
           <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-blue-900/40 uppercase tracking-widest ml-1">Username</label>
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-medium text-blue-900/50 uppercase tracking-widest ml-1">Username</label>
               <input 
                 type="text" 
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Masukkan username..."
-                className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-sm font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-900/5 transition-all"
+                className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-3.5 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-900/10 transition-all font-inter"
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-blue-900/40 uppercase tracking-widest ml-1">Password</label>
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-medium text-blue-900/50 uppercase tracking-widest ml-1">Password</label>
               <input 
                 type="password" 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Masukkan password..."
-                className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-sm font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-900/5 transition-all"
+                className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-3.5 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-900/10 transition-all font-inter"
               />
             </div>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-3 pt-2">
             <button 
               onClick={() => onLogin(username, password)}
-              className="w-full bg-blue-900 text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-blue-900/20 hover:bg-blue-800 transition-all active:scale-[0.98]"
+              className="w-full bg-blue-900 text-white py-4 rounded-xl font-semibold text-xs uppercase tracking-widest shadow-lg shadow-blue-900/20 hover:bg-blue-800 transition-all active:scale-[0.98]"
             >
               Masuk Sebagai Admin
             </button>
             <button 
               onClick={onGuestAccess}
-              className="w-full bg-white border border-gray-100 text-gray-500 py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-gray-50 transition-all active:scale-[0.98]"
+              className="w-full bg-white border border-gray-200 text-gray-600 py-4 rounded-xl font-semibold text-xs uppercase tracking-widest hover:bg-gray-50 hover:text-gray-900 transition-all active:scale-[0.98]"
             >
               Masuk Sebagai Tamu
             </button>
           </div>
         </div>
-        <div className="bg-gray-50 p-6 text-center border-t border-gray-100">
-          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Kecamatan Ujung Pandang &copy; 2026</p>
+        <div className="bg-gray-50/80 p-5 text-center border-t border-gray-100">
+          <p className="text-[10px] text-gray-400 font-medium uppercase tracking-widest">Kecamatan Ujung Pandang &copy; 2026</p>
         </div>
       </motion.div>
     </div>
@@ -977,8 +977,8 @@ const AgendaDetailModal = ({ isOpen, onClose, agenda, onEdit }: { isOpen: boolea
                 <FileText size={24} strokeWidth={2.5} />
               </div>
               <div>
-                <h2 className="text-lg font-black text-blue-900 tracking-tight uppercase leading-none">Detail Agenda</h2>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">{agenda.id} • {agenda.status}</p>
+                <h2 className="text-base sm:text-[17px] font-semibold text-blue-900 tracking-tight leading-none uppercase">Detail Agenda</h2>
+                <p className="text-[10px] font-normal tracking-[0.2em] text-gray-400 uppercase mt-2 leading-none">{agenda.id} • {agenda.status}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -1001,52 +1001,52 @@ const AgendaDetailModal = ({ isOpen, onClose, agenda, onEdit }: { isOpen: boolea
           {/* Content */}
           <div className="flex-1 overflow-y-auto p-8 space-y-8">
             {/* Title Section */}
-            <div className="space-y-2">
-              <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${
+            <div className="space-y-3">
+              <span className={`px-3 py-1.5 rounded-lg text-[10px] font-semibold uppercase tracking-wider ${
                 agenda.status === 'HADIR' ? 'bg-emerald-100 text-emerald-800' : 'bg-orange-100 text-orange-800'
               }`}>
                 {agenda.status}
               </span>
-              <h3 className="text-2xl lg:text-3xl font-black text-blue-900 leading-tight">
-                {agenda.title}
+              <h3 className="text-base sm:text-lg font-semibold text-blue-900 leading-[1.6] tracking-wide font-poppins capitalize">
+                {agenda.title.toLowerCase()}
               </h3>
             </div>
 
             {/* Info Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div className="space-y-1">
-                <p className="text-[10px] font-black text-blue-900/40 uppercase tracking-widest">Waktu & Tanggal</p>
-                <div className="flex items-center gap-2 text-gray-700 font-bold">
-                  <Clock size={16} className="text-blue-600" />
-                  <span>{formatTime(agenda.time)} • {formatDate(agenda.date)}</span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              <div className="space-y-1.5">
+                <p className="text-[10px] font-medium text-blue-900/50 uppercase tracking-widest">Waktu & Tanggal</p>
+                <div className="flex items-center gap-2 text-gray-800 font-semibold text-sm sm:text-base">
+                  <Clock size={16} className="text-blue-600 shrink-0" />
+                  <span className="leading-tight">{formatTime(agenda.time)} • {formatDate(agenda.date)}</span>
                 </div>
               </div>
-              <div className="space-y-1">
-                <p className="text-[10px] font-black text-blue-900/40 uppercase tracking-widest">Lokasi</p>
-                <div className="flex items-center gap-2 text-gray-700 font-bold">
-                  <MapPin size={16} className="text-blue-600" />
-                  <span>{agenda.location || '-'}</span>
+              <div className="space-y-1.5">
+                <p className="text-[10px] font-medium text-blue-900/50 uppercase tracking-widest">Lokasi</p>
+                <div className="flex items-center gap-2 text-gray-800 font-semibold text-sm sm:text-base">
+                  <MapPin size={16} className="text-blue-600 shrink-0" />
+                  <span className="leading-tight">{agenda.location || '-'}</span>
                 </div>
               </div>
-              <div className="space-y-1">
-                <p className="text-[10px] font-black text-blue-900/40 uppercase tracking-widest">Pakaian</p>
-                <div className="flex items-center gap-2 text-gray-700 font-bold">
-                  <User size={16} className="text-blue-600" />
-                  <span>{agenda.dressCode || '-'}</span>
+              <div className="space-y-1.5">
+                <p className="text-[10px] font-medium text-blue-900/50 uppercase tracking-widest">Pakaian</p>
+                <div className="flex items-center gap-2 text-gray-800 font-semibold text-sm sm:text-base">
+                  <User size={16} className="text-blue-600 shrink-0" />
+                  <span className="leading-tight">{agenda.dressCode || '-'}</span>
                 </div>
               </div>
-              <div className="space-y-1">
-                <p className="text-[10px] font-black text-blue-900/40 uppercase tracking-widest">Penyelenggara</p>
-                <div className="flex items-center gap-2 text-gray-700 font-bold">
-                  <FileText size={16} className="text-blue-600" />
-                  <span>{agenda.organizer || '-'}</span>
+              <div className="space-y-1.5">
+                <p className="text-[10px] font-medium text-blue-900/50 uppercase tracking-widest">Penyelenggara</p>
+                <div className="flex items-center gap-2 text-gray-800 font-semibold text-sm sm:text-base">
+                  <FileText size={16} className="text-blue-600 shrink-0" />
+                  <span className="leading-tight">{agenda.organizer || '-'}</span>
                 </div>
               </div>
             </div>
 
             {/* Keterangan */}
             <div className="space-y-2">
-              <p className="text-[10px] font-black text-blue-900/40 uppercase tracking-widest">Keterangan</p>
+              <p className="text-[10px] font-medium text-blue-900/50 uppercase tracking-widest">Keterangan</p>
               <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
                 <p className="text-sm text-gray-600 font-medium leading-relaxed">
                   {agenda.notes || 'Tidak ada keterangan tambahan.'}
@@ -1057,10 +1057,10 @@ const AgendaDetailModal = ({ isOpen, onClose, agenda, onEdit }: { isOpen: boolea
             {/* Disposisi (If any) */}
             {agenda.disposisiTo && agenda.disposisiTo.length > 0 && (
               <div className="space-y-2">
-                <p className="text-[10px] font-black text-blue-900/40 uppercase tracking-widest">Disposisi Ke</p>
+                <p className="text-[10px] font-medium text-blue-900/50 uppercase tracking-widest">Disposisi Ke</p>
                 <div className="flex flex-wrap gap-2">
                   {agenda.disposisiTo.map((target, idx) => (
-                    <span key={idx} className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-tight border border-blue-100">
+                    <span key={idx} className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-tight border border-blue-100">
                       {target}
                     </span>
                   ))}
@@ -1070,7 +1070,7 @@ const AgendaDetailModal = ({ isOpen, onClose, agenda, onEdit }: { isOpen: boolea
 
             {/* Invitation Preview */}
             <div className="space-y-3">
-              <p className="text-[10px] font-black text-blue-900/40 uppercase tracking-widest">File Undangan</p>
+              <p className="text-[10px] font-medium text-blue-900/50 uppercase tracking-widest">File Undangan</p>
               <div 
                 onClick={() => agenda.linkUndangan && window.open(agenda.linkUndangan, '_blank')}
                 className="relative group cursor-pointer"
@@ -1106,17 +1106,17 @@ const AgendaDetailModal = ({ isOpen, onClose, agenda, onEdit }: { isOpen: boolea
           </div>
 
           {/* Footer */}
-          <div className="p-6 bg-gray-50/50 border-t border-gray-100 flex gap-4">
+          <div className="p-4 sm:p-6 bg-gray-50/80 border-t border-gray-100 flex gap-3 sm:gap-4">
             <button 
               onClick={handleDownloadPdf}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white leading-none py-3.5 sm:py-4 rounded-xl sm:rounded-2xl font-semibold text-xs sm:text-sm tracking-wide shadow-md shadow-blue-600/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
             >
               <Download size={18} />
               Download PDF
             </button>
             <button 
               onClick={onClose}
-              className="flex-1 bg-white border border-gray-200 text-gray-600 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-gray-50 transition-all active:scale-[0.98]"
+              className="flex-1 bg-white border border-gray-200 text-gray-700 leading-none py-3.5 sm:py-4 rounded-xl sm:rounded-2xl font-semibold text-xs sm:text-sm tracking-wide hover:bg-gray-50 hover:text-gray-900 transition-all active:scale-[0.98]"
             >
               Tutup
             </button>
@@ -1390,56 +1390,56 @@ const BerandaView = ({ setView, onAddAgenda, currentTime, onSelectAgenda, onEdit
       className="space-y-6 lg:space-y-8"
     >
       {/* Hero Section */}
-      <section className="bg-blue-900 rounded-[2.5rem] p-6 lg:p-10 text-white relative overflow-hidden shadow-2xl shadow-blue-900/30">
+      <section className="bg-blue-900 rounded-3xl lg:rounded-[2.5rem] p-5 lg:p-10 text-white relative overflow-hidden shadow-2xl shadow-blue-900/30">
         <div className="relative z-10">
-          <div className="flex flex-col items-center text-center gap-6 lg:gap-8">
+          <div className="flex flex-col items-center text-center gap-5 lg:gap-8">
             <div className="space-y-2">
-              <h2 className="text-lg lg:text-xl font-bold opacity-80 tracking-tight">Selamat Datang,</h2>
-              <h3 className="text-2xl lg:text-4xl font-black tracking-tighter leading-tight">{user?.role === 'GUEST' ? 'Tamu' : profile.name}</h3>
-              <p className="text-xs lg:text-sm font-bold text-blue-300 uppercase tracking-widest">{user?.role === 'GUEST' ? 'Pengunjung' : profile.title}</p>
+              <h2 className="text-sm lg:text-lg font-medium opacity-90 tracking-tight">Selamat Datang,</h2>
+              <h3 className="text-xl sm:text-2xl lg:text-4xl font-bold tracking-tight leading-tight font-poppins">{user?.role === 'GUEST' ? 'Tamu' : profile.name}</h3>
+              <p className="text-[10px] lg:text-xs font-medium text-blue-200 uppercase tracking-widest">{user?.role === 'GUEST' ? 'Pengunjung' : profile.title}</p>
             </div>
-            <div className="bg-white/10 backdrop-blur-xl rounded-2xl px-5 py-3 border border-white/10 w-fit mx-auto">
-              <p className="text-xs lg:text-sm font-bold tracking-wide opacity-90">{formattedDate}</p>
+            <div className="bg-white/10 backdrop-blur-xl rounded-xl lg:rounded-2xl px-4 py-2 border border-white/10 w-fit mx-auto">
+              <p className="text-[10px] lg:text-sm font-medium tracking-wide opacity-90">{formattedDate}</p>
             </div>
           </div>
-          <div className="mt-10 lg:mt-14 flex flex-col items-center gap-4 text-center">
-            <div className="bg-emerald-500 text-white px-5 py-2 rounded-2xl text-xs font-black uppercase tracking-widest flex items-center gap-2 w-fit shadow-lg shadow-emerald-500/20">
-              <Calendar size={16} />
+          <div className="mt-8 lg:mt-12 flex flex-col items-center gap-3 lg:gap-4 text-center">
+            <div className="bg-emerald-500 text-white px-4 py-1.5 rounded-xl text-[10px] lg:text-xs font-semibold uppercase tracking-widest flex items-center gap-2 w-fit shadow-md shadow-emerald-500/20">
+              <Calendar size={14} />
               {todayAgendasCount} Agenda Hari Ini
             </div>
-            <p className="text-blue-200/80 text-xs lg:text-sm font-bold tracking-tight">
+            <p className="text-blue-200 text-[10px] lg:text-sm font-medium tracking-wide w-3/4 mx-auto leading-relaxed">
               {agendas.length > 0 ? `Agenda terdekat: ${nextAgenda.title}` : 'Semua data sinkron dengan Google Sheets'}
             </p>
           </div>
         </div>
         {/* Decorative elements */}
-        <Calendar size={240} className="absolute -right-12 -bottom-12 text-white opacity-10 -rotate-12 pointer-events-none" />
-        <div className="absolute -right-20 -top-20 w-64 h-64 bg-blue-800 rounded-full opacity-50 blur-3xl"></div>
-        <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-blue-700 rounded-full opacity-30 blur-3xl"></div>
+        <Calendar size={240} className="absolute -right-12 -bottom-12 text-white opacity-[0.03] lg:opacity-5 -rotate-12 pointer-events-none" />
+        <div className="absolute -right-20 -top-20 w-64 h-64 bg-blue-800 rounded-full opacity-40 blur-3xl"></div>
+        <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-blue-700 rounded-full opacity-20 blur-3xl"></div>
       </section>
 
       {/* Main Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
         {/* Left Column: Next Agenda */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h4 className="text-lg font-bold text-gray-900">Agenda Berikutnya</h4>
+            <h4 className="text-base lg:text-lg font-semibold text-gray-900">Agenda Berikutnya</h4>
             <button 
               onClick={() => setView('Jadwal')}
-              className="text-blue-600 text-sm font-bold hover:underline"
+              className="text-blue-600 text-xs sm:text-sm font-medium hover:underline"
             >
               Lihat Semua
             </button>
           </div>
           <div 
             onClick={() => onSelectAgenda(nextAgenda)}
-            className="bg-white border border-gray-100 rounded-[2rem] p-6 shadow-sm hover:shadow-md transition-all cursor-pointer group"
+            className="bg-white border border-gray-100 rounded-3xl lg:rounded-[2rem] p-5 lg:p-6 shadow-sm hover:shadow-md transition-all cursor-pointer group"
           >
-            <div className="flex justify-between items-start mb-6">
+            <div className="flex justify-between items-start mb-5 lg:mb-6">
               <div className="flex gap-2">
-                <span className="bg-blue-100 text-blue-900 px-3 py-1 rounded-lg text-xs font-bold">{nextAgenda.time}</span>
-                <span className={`px-3 py-1 rounded-lg text-xs font-bold ${
-                  nextAgenda.status === 'HADIR' ? 'bg-emerald-100 text-emerald-800' : 'bg-orange-100 text-orange-800'
+                <span className="bg-blue-50/50 text-blue-900 px-3 py-1.5 rounded-lg text-[10px] lg:text-xs font-semibold tracking-wide border border-blue-50">{nextAgenda.time}</span>
+                <span className={`px-3 py-1.5 rounded-lg text-[10px] lg:text-xs font-semibold tracking-wide ${
+                  nextAgenda.status === 'HADIR' ? 'bg-emerald-50/50 text-emerald-800 border border-emerald-50' : 'bg-orange-50/50 text-orange-800 border border-orange-50'
                 }`}>{nextAgenda.status}</span>
               </div>
               <div className="flex gap-2">
@@ -1449,62 +1449,64 @@ const BerandaView = ({ setView, onAddAgenda, currentTime, onSelectAgenda, onEdit
                       e.stopPropagation();
                       onEditAgenda(nextAgenda);
                     }}
-                    className="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center hover:bg-blue-900 hover:text-white transition-all duration-200"
+                    className="w-9 h-9 sm:w-10 sm:h-10 bg-blue-50/50 text-blue-600 rounded-full flex items-center justify-center hover:bg-blue-900 hover:text-white transition-all duration-200"
                     title="Edit"
                   >
-                    <Edit size={18} />
+                    <Edit size={16} />
                   </button>
                 )}
                 <button 
-                  className="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center text-gray-400 group-hover:bg-blue-900 group-hover:text-white transition-all duration-200"
+                  className="w-9 h-9 sm:w-10 sm:h-10 bg-gray-50 rounded-full flex items-center justify-center text-gray-400 group-hover:bg-blue-900 group-hover:text-white transition-all duration-200"
                 >
-                  <ChevronRight size={20} />
+                  <ChevronRight size={18} />
                 </button>
               </div>
             </div>
-            <h5 className="text-xl font-bold text-gray-900 leading-snug mb-4 group-hover:text-blue-900 transition-colors">
-              {nextAgenda.title}
+            <h5 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 leading-[1.6] mb-4 group-hover:text-blue-900 transition-colors font-poppins capitalize">
+              {nextAgenda.title.toLowerCase()}
             </h5>
-            <div className="flex items-center gap-3 text-gray-500 text-sm border-t border-gray-50 pt-4">
-              <div className="flex items-center gap-1">
-                <User size={14} />
-                <span>{nextAgenda.organizer}</span>
+            <div className="flex items-center gap-3 text-gray-500 text-[10px] sm:text-xs border-t border-gray-50 pt-4 font-medium">
+              <div className="flex items-center gap-1.5 bg-gray-50/50 px-2 py-1 rounded-md">
+                <User size={12} />
+                <span className="truncate max-w-[100px] sm:max-w-none">{nextAgenda.organizer}</span>
               </div>
-              <div className="w-1 h-1 bg-gray-300 rounded-full"></div>
-              <span>{nextAgenda.location}</span>
+              <div className="flex items-center gap-1.5 bg-gray-50/50 px-2 py-1 rounded-md">
+                <MapPin size={12} />
+                <span className="truncate max-w-[100px] sm:max-w-none">{nextAgenda.location}</span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Right Column: Quick Access & Sync */}
-        <div className="space-y-6">
+        <div className="space-y-5 lg:space-y-6">
           <div className="space-y-4">
-            <h4 className="text-lg font-bold text-gray-900">Akses Cepat</h4>
+            <h4 className="text-base lg:text-lg font-semibold text-gray-900">Akses Cepat</h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {user?.role === 'ADMIN' && (
                 <button 
                   onClick={onAddAgenda}
-                  className="group bg-white border border-gray-100 rounded-2xl p-3.5 flex items-center gap-4 shadow-sm hover:shadow-md hover:border-blue-100 transition-all duration-300"
+                  className="group bg-white border border-gray-100 rounded-2xl p-3 flex items-center gap-3.5 shadow-sm hover:shadow-md hover:border-blue-100 transition-all duration-300"
                 >
-                  <div className="w-11 h-11 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-blue-900 group-hover:text-white transition-colors">
-                    <FilePlus size={22} />
+                  <div className="w-10 h-10 bg-blue-50/50 text-blue-600 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-blue-900 group-hover:text-white transition-colors">
+                    <FilePlus size={18} />
                   </div>
                   <div className="text-left">
-                    <p className="font-bold text-gray-900 text-sm">Tambah Agenda</p>
-                    <p className="text-[10px] text-gray-400 leading-tight">Buat jadwal kegiatan baru</p>
+                    <p className="font-semibold text-gray-900 text-xs sm:text-sm">Tambah Agenda</p>
+                    <p className="text-[9px] sm:text-[10px] text-gray-400 mt-0.5">Buat jadwal kegiatan baru</p>
                   </div>
                 </button>
               )}
               <button 
                 onClick={() => setView('Laporan')}
-                className={`group bg-white border border-gray-100 rounded-2xl p-3.5 flex items-center gap-4 shadow-sm hover:shadow-md hover:border-blue-100 transition-all duration-300 ${user?.role !== 'ADMIN' ? 'sm:col-span-2' : ''}`}
+                className={`group bg-white border border-gray-100 rounded-2xl p-3 flex items-center gap-3.5 shadow-sm hover:shadow-md hover:border-blue-100 transition-all duration-300 ${user?.role !== 'ADMIN' ? 'sm:col-span-2' : ''}`}
               >
-                <div className="w-11 h-11 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-blue-900 group-hover:text-white transition-colors">
-                  <FileText size={22} />
+                <div className="w-10 h-10 bg-blue-50/50 text-blue-600 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-blue-900 group-hover:text-white transition-colors">
+                  <FileText size={18} />
                 </div>
                 <div className="text-left">
-                  <p className="font-bold text-gray-900 text-sm">Lihat Laporan</p>
-                  <p className="text-[10px] text-gray-400 leading-tight">Cek rekapitulasi agenda</p>
+                  <p className="font-semibold text-gray-900 text-xs sm:text-sm">Lihat Laporan</p>
+                  <p className="text-[9px] sm:text-[10px] text-gray-400 mt-0.5">Cek rekapitulasi agenda</p>
                 </div>
               </button>
             </div>
@@ -1517,9 +1519,9 @@ const BerandaView = ({ setView, onAddAgenda, currentTime, onSelectAgenda, onEdit
                 <Cloud size={20} className={isLoading ? 'animate-pulse' : ''} />
               </div>
               <div>
-                <p className="text-xs font-black text-gray-900 uppercase tracking-widest">Sinkronisasi Data</p>
+                <p className="text-[10px] sm:text-xs font-semibold text-gray-900 uppercase tracking-widest">Sinkronisasi Data</p>
                 {lastSync && (
-                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">
+                  <p className="text-[9px] sm:text-[10px] text-gray-400 font-medium tracking-wide mt-0.5">
                     Update terakhir: {lastSync.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 )}
@@ -1528,7 +1530,7 @@ const BerandaView = ({ setView, onAddAgenda, currentTime, onSelectAgenda, onEdit
             <button 
               onClick={fetchAgendas}
               disabled={isLoading}
-              className="w-full sm:w-auto h-11 px-6 bg-blue-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-800 transition-all disabled:opacity-50 active:scale-[0.98] shadow-lg shadow-blue-900/10"
+              className="w-full sm:w-auto h-10 sm:h-11 px-5 sm:px-6 bg-blue-900 text-white rounded-xl font-semibold text-[9px] sm:text-[10px] uppercase tracking-widest hover:bg-blue-800 transition-all disabled:opacity-50 active:scale-[0.98] shadow-lg shadow-blue-900/10"
             >
               {isLoading ? 'Sinkron...' : 'Sinkronkan Sekarang'}
             </button>
@@ -1675,8 +1677,8 @@ const JadwalView = ({ currentTime, onSelectAgenda, onEditAgenda, onDeleteAgenda,
     >
       {/* Date Strip */}
       <div className="bg-white border border-gray-100 rounded-3xl lg:rounded-[2rem] p-4 lg:p-6 shadow-sm overflow-hidden relative">
-        <div className="flex items-center justify-center mb-6 px-2">
-          <h4 className="text-sm font-black text-blue-900 uppercase tracking-[0.2em] bg-blue-50 px-6 py-2 rounded-full border border-blue-100">
+        <div className="flex items-center justify-center mb-4 sm:mb-6 px-2">
+          <h4 className="text-[10px] sm:text-xs font-semibold text-blue-900 uppercase tracking-[0.15em] bg-blue-50 px-5 sm:px-6 py-1.5 sm:py-2 rounded-full border border-blue-100/50">
             {displayedMonth}
           </h4>
         </div>
@@ -1703,16 +1705,16 @@ const JadwalView = ({ currentTime, onSelectAgenda, onEditAgenda, onDeleteAgenda,
                     key={i}
                     ref={isActive ? activeDateRef : null}
                     onClick={() => setSelectedDate(d.fullDate)}
-                    className={`flex flex-col items-center justify-center min-w-[60px] lg:min-w-[70px] h-20 lg:h-24 rounded-2xl transition-all duration-300 snap-center ${
+                    className={`flex flex-col items-center justify-center min-w-[55px] sm:min-w-[60px] lg:min-w-[70px] h-16 sm:h-20 lg:h-24 rounded-2xl transition-all duration-300 snap-center ${
                       isActive 
-                        ? 'bg-blue-900 text-white shadow-xl shadow-blue-900/30 scale-110 z-10' 
+                        ? 'bg-blue-900 text-white shadow-lg shadow-blue-900/30 scale-105 sm:scale-110 z-10' 
                         : 'bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-gray-600'
                     }`}
                   >
-                    <span className={`text-[9px] lg:text-[11px] font-bold uppercase tracking-wider mb-1 ${isActive ? 'text-blue-100' : 'text-gray-400'}`}>
+                    <span className={`text-[9px] lg:text-[10px] font-medium uppercase tracking-wider mb-0.5 sm:mb-1 ${isActive ? 'text-blue-100' : 'text-gray-400'}`}>
                       {d.day}
                     </span>
-                    <span className="text-xl lg:text-2xl font-black">
+                    <span className="text-lg sm:text-xl lg:text-2xl font-semibold">
                       {d.date}
                     </span>
                     {d.fullDate.toDateString() === new Date(currentTime).toDateString() && !isActive && (
@@ -1736,88 +1738,88 @@ const JadwalView = ({ currentTime, onSelectAgenda, onEditAgenda, onDeleteAgenda,
 
       {/* Agenda List */}
       <div className="space-y-4">
-        <div className="flex flex-col gap-4 px-2">
-          <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
-            <div className="flex items-center gap-3 sm:gap-4">
-              <h4 className="text-lg font-bold text-gray-900 shrink-0">
+        <div className="flex flex-col gap-3 px-1 sm:px-2">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <h4 className="text-base sm:text-lg font-semibold text-gray-900 shrink-0">
                 {selectedDate.toDateString() === new Date().toDateString() ? 'Agenda Hari Ini' : `Agenda ${selectedDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}`}
               </h4>
               <button 
                 onClick={fetchAgendas}
                 disabled={isLoading}
-                className="p-2 bg-white border border-gray-100 rounded-xl shadow-sm hover:bg-blue-50 hover:text-blue-600 transition-all disabled:opacity-50"
+                className="p-1.5 sm:p-2 bg-white border border-gray-100 rounded-lg sm:rounded-xl shadow-sm hover:bg-blue-50 hover:text-blue-600 transition-all disabled:opacity-50"
                 title="Segarkan Data"
               >
-                <Cloud size={16} className={isLoading ? 'animate-pulse' : ''} />
+                <Cloud size={14} className={isLoading ? 'animate-pulse' : ''} />
               </button>
             </div>
             <div className="relative group max-w-full">
-              <div className="flex items-center gap-2 bg-white border border-gray-100 rounded-xl px-2.5 sm:px-3 py-1.5 shadow-sm cursor-pointer hover:border-blue-200 transition-all overflow-hidden">
-                <Filter size={14} className="text-blue-600 shrink-0" />
+              <div className="flex items-center gap-2 bg-white border border-gray-100 rounded-lg sm:rounded-xl px-2.5 py-1.5 shadow-sm cursor-pointer hover:border-blue-200 transition-all overflow-hidden">
+                <Filter size={12} className="text-blue-600 shrink-0" />
                 <select 
                   value={filter}
                   onChange={(e) => setFilter(e.target.value)}
-                  className="text-[9px] sm:text-[10px] font-black text-blue-900 uppercase tracking-widest bg-transparent outline-none appearance-none cursor-pointer pr-5 max-w-[110px] xs:max-w-[160px] sm:max-w-none"
+                  className="text-[9px] sm:text-[10px] font-semibold text-blue-900 uppercase tracking-widest bg-transparent outline-none appearance-none cursor-pointer pr-4 max-w-[110px] xs:max-w-[160px] sm:max-w-none"
                 >
                   <option value="SEMUA">SEMUA DISPOSISI</option>
                   {disposisiOptions.map((opt, i) => (
                     <option key={i} value={opt}>{opt}</option>
                   ))}
                 </select>
-                <ChevronDown size={12} className="absolute right-1.5 text-gray-400 pointer-events-none" />
+                <ChevronDown size={10} className="absolute right-1.5 text-gray-400 pointer-events-none" />
               </div>
             </div>
           </div>
-          <div className="w-full flex justify-center items-center gap-2 text-xs lg:text-sm text-gray-500 py-1">
-            <Calendar size={14} />
+          <div className="w-full flex justify-center items-center gap-1.5 text-[10px] sm:text-xs text-gray-400 py-1 font-medium">
+            <Calendar size={12} />
             <span className="text-center">{selectedFormatted}</span>
           </div>
         </div>
         
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {isLoading ? (
-            <div className="bg-white border border-gray-100 rounded-3xl p-12 flex flex-col items-center justify-center text-blue-600">
-              <div className="w-8 h-8 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-4"></div>
-              <p className="text-[10px] font-black uppercase tracking-widest">Mengambil Data...</p>
+            <div className="bg-white border border-gray-100 rounded-3xl p-10 flex flex-col items-center justify-center text-blue-600">
+              <div className="w-6 h-6 border-2 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-3"></div>
+              <p className="text-[9px] font-semibold uppercase tracking-widest">Mengambil Data...</p>
             </div>
           ) : filteredAgendas.length > 0 ? filteredAgendas.map((agenda) => (
             <motion.div 
               key={agenda.id}
               whileHover={{ x: 4 }}
               onClick={() => onSelectAgenda(agenda)}
-              className="bg-white border border-gray-100 rounded-3xl lg:rounded-[2rem] p-5 lg:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center gap-4 lg:gap-6 group cursor-pointer"
+              className="bg-white border border-gray-100 rounded-[1.5rem] lg:rounded-[2rem] p-4 sm:p-5 lg:p-6 shadow-sm hover:shadow-md flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 lg:gap-6 group cursor-pointer"
             >
-              <div className="flex sm:flex-col items-center justify-center min-w-[80px] sm:border-r border-gray-50 sm:pr-6 gap-2 sm:gap-0">
-                <p className="text-sm font-black text-blue-900">{agenda.time.split(' ')[0]}</p>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">WITA</p>
+              <div className="flex sm:flex-col items-center justify-center min-w-[70px] sm:border-r border-gray-50 sm:pr-5 gap-1 sm:gap-0">
+                <p className="text-xs sm:text-sm font-bold text-blue-900">{agenda.time.split(' ')[0]}</p>
+                <p className="text-[9px] sm:text-[10px] font-medium text-gray-400 uppercase tracking-wider">WITA</p>
               </div>
               
               <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${
+                <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
+                  <span className={`px-2.5 py-1 rounded-md text-[9px] font-semibold uppercase tracking-wider ${
                     agenda.status === 'HADIR' 
-                      ? 'bg-emerald-100 text-emerald-800' 
-                      : 'bg-orange-100 text-orange-800'
+                      ? 'bg-emerald-50/70 text-emerald-700 border border-emerald-50' 
+                      : 'bg-orange-50/70 text-orange-700 border border-orange-50'
                   }`}>
                     {agenda.status}
                   </span>
                 </div>
-                <h5 className="text-base lg:text-lg font-bold text-gray-900 group-hover:text-blue-900 transition-colors leading-snug">
-                  {agenda.title}
+                <h5 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 group-hover:text-blue-900 transition-colors leading-[1.5] font-poppins capitalize">
+                  {agenda.title.toLowerCase()}
                 </h5>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 mt-2 sm:mt-0">
                 {user?.role === 'ADMIN' && (
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();
                       onEditAgenda(agenda);
                     }}
-                    className="flex items-center justify-center gap-2 bg-blue-50 text-blue-700 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-900 hover:text-white transition-all duration-200 shadow-sm"
+                    className="flex flex-1 sm:flex-none items-center justify-center gap-1.5 bg-blue-50/50 text-blue-600 px-3 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[9px] sm:text-[10px] font-semibold uppercase tracking-widest hover:bg-blue-900 hover:text-white transition-all duration-200"
                   >
-                    <Edit size={14} />
-                    EDIT
+                    <Edit size={12} />
+                    <span>EDIT</span>
                   </button>
                 )}
                 {user?.role === 'ADMIN' && (
@@ -2215,37 +2217,37 @@ const LaporanView = ({ setView, agendas }: { setView: (v: View) => void, agendas
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-8"
+      className="space-y-6 lg:space-y-8"
     >
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 lg:gap-4">
         <div>
-          <h2 className="text-2xl lg:text-3xl font-black text-blue-900 tracking-tight uppercase">Laporan Agenda</h2>
-          <p className="text-sm text-gray-500 font-medium mt-1">Rekapitulasi jadwal pimpinan dalam rentang waktu tertentu</p>
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-900 tracking-tight font-poppins">Laporan Agenda</h2>
+          <p className="text-[10px] sm:text-xs lg:text-sm text-gray-500 font-medium mt-1">Rekapitulasi jadwal pimpinan dalam rentang waktu tertentu</p>
         </div>
-        <div className="bg-blue-50 px-4 py-2 rounded-2xl border border-blue-100 flex items-center gap-2">
-          <CalendarRange size={18} className="text-blue-600" />
-          <span className="text-xs font-black text-blue-900 uppercase tracking-widest">Maks. 31 Hari</span>
+        <div className="bg-blue-50/70 px-3 lg:px-4 py-1.5 lg:py-2 rounded-xl border border-blue-100/50 flex items-center gap-2 w-fit">
+          <CalendarRange size={16} className="text-blue-600" />
+          <span className="text-[10px] sm:text-xs font-semibold text-blue-900 uppercase tracking-widest">Maks. 31 Hari</span>
         </div>
       </div>
 
-      <div className="bg-white border border-gray-100 rounded-[2.5rem] p-8 shadow-sm space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="space-y-3">
-            <label className="text-[10px] font-black text-blue-900/40 uppercase tracking-widest ml-1">Tanggal Awal</label>
+      <div className="bg-white border border-gray-100 rounded-3xl lg:rounded-[2.5rem] p-5 sm:p-6 lg:p-8 shadow-sm space-y-6 lg:space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-8">
+          <div className="space-y-2">
+            <label className="text-[10px] font-medium text-gray-500 uppercase tracking-widest ml-1">Tanggal Awal</label>
             <input 
               type="date" 
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-900/5 transition-all"
+              className="w-full bg-gray-50 border border-gray-200 rounded-xl lg:rounded-2xl px-5 py-3 lg:py-4 text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-900/10 transition-all font-inter"
             />
           </div>
-          <div className="space-y-3">
-            <label className="text-[10px] font-black text-blue-900/40 uppercase tracking-widest ml-1">Tanggal Akhir</label>
+          <div className="space-y-2">
+            <label className="text-[10px] font-medium text-gray-500 uppercase tracking-widest ml-1">Tanggal Akhir</label>
             <input 
               type="date" 
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-900/5 transition-all"
+              className="w-full bg-gray-50 border border-gray-200 rounded-xl lg:rounded-2xl px-5 py-3 lg:py-4 text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-900/10 transition-all font-inter"
             />
           </div>
         </div>
@@ -2254,27 +2256,27 @@ const LaporanView = ({ setView, agendas }: { setView: (v: View) => void, agendas
           <motion.p 
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
-            className="text-xs font-bold text-red-500 bg-red-50 px-4 py-3 rounded-xl border border-red-100 flex items-center gap-2"
+            className="text-[10px] sm:text-xs font-semibold text-red-600 bg-red-50/80 px-4 py-2.5 rounded-xl border border-red-100 flex items-center gap-2"
           >
-            <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+            <span className="w-1.5 h-1.5 bg-red-500 rounded-full shrink-0"></span>
             {error}
           </motion.p>
         )}
 
-        <div className="pt-4 border-t border-gray-50 flex flex-col sm:flex-row items-center gap-4">
+        <div className="pt-2 border-t border-gray-50 flex flex-col sm:flex-row items-center gap-3">
           <button 
             onClick={handleShowPreview}
             disabled={isLoadingPreview || isGenerating}
-            className={`flex-1 w-full sm:w-auto bg-blue-50 text-blue-900 py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-sm flex items-center justify-center gap-3 transition-all active:scale-[0.98] ${isLoadingPreview ? 'opacity-70 cursor-not-allowed' : 'hover:bg-blue-100'}`}
+            className={`flex-1 w-full sm:w-auto bg-blue-50/70 text-blue-900 py-3.5 lg:py-4 rounded-xl lg:rounded-2xl font-semibold text-[10px] lg:text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all active:scale-[0.98] ${isLoadingPreview ? 'opacity-70 cursor-not-allowed' : 'hover:bg-blue-100/70'}`}
           >
             {isLoadingPreview ? (
               <>
-                <div className="w-4 h-4 border-2 border-blue-900/30 border-t-blue-900 rounded-full animate-spin"></div>
+                <div className="w-3.5 h-3.5 border-2 border-blue-900/30 border-t-blue-900 rounded-full animate-spin"></div>
                 Memuat...
               </>
             ) : (
               <>
-                <List size={18} />
+                <List size={16} />
                 Tampilkan Laporan
               </>
             )}
@@ -2283,11 +2285,11 @@ const LaporanView = ({ setView, agendas }: { setView: (v: View) => void, agendas
           <button 
             onClick={handleGenerate}
             disabled={isGenerating || isLoadingPreview}
-            className={`flex-1 w-full sm:w-auto bg-blue-900 text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-900/20 flex items-center justify-center gap-3 transition-all active:scale-[0.98] ${isGenerating ? 'opacity-70 cursor-not-allowed' : 'hover:bg-blue-800'}`}
+            className={`flex-1 w-full sm:w-auto bg-blue-900 text-white py-3.5 lg:py-4 rounded-xl lg:rounded-2xl font-semibold text-[10px] lg:text-xs uppercase tracking-widest shadow-lg shadow-blue-900/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98] ${isGenerating ? 'opacity-70 cursor-not-allowed' : 'hover:bg-blue-800'}`}
           >
             {isGenerating ? (
               <>
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                 Memproses...
               </>
             ) : (
