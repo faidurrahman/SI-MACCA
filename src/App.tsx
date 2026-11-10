@@ -2048,6 +2048,44 @@ const LaporanView = ({ setView, agendas }: { setView: (v: View) => void, agendas
         console.warn('Failed to load signature image', e);
       }
 
+      let logoKecamatanBase64: string | null = null;
+      try {
+        let resKec = await fetch('/assets/aistudio/logo_kecamatan_ujung_pandang.png');
+        if (!resKec.ok) {
+          resKec = await fetch('/assets/aistudio/LOGO_PNG_c7e085f6.png');
+        }
+        if (resKec.ok) {
+          const blob = await resKec.blob();
+          logoKecamatanBase64 = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          });
+        }
+      } catch (e) {
+        console.warn('Failed to load logo kecamatan', e);
+      }
+
+      let logoKotaBase64: string | null = null;
+      try {
+        let resKota = await fetch('/assets/aistudio/logo_pemkot.png');
+        if (!resKota.ok) {
+          resKota = await fetch('https://iili.io/q3KBl4V.png');
+        }
+        if (resKota.ok) {
+          const blob = await resKota.blob();
+          logoKotaBase64 = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          });
+        }
+      } catch (e) {
+        console.warn('Failed to load logo kota', e);
+      }
+
       const doc = new jsPDF({
         orientation: 'landscape',
         unit: 'mm',
@@ -2060,18 +2098,31 @@ const LaporanView = ({ setView, agendas }: { setView: (v: View) => void, agendas
         if (index > 0) doc.addPage();
 
         const pageWidth = doc.internal.pageSize.getWidth();
-        
+        const logoSize = 24; // Ukuran proporsional 24mm x 24mm (1:1) untuk kedua logo
+        const logoY = 9;
+
         // Header Logos
-        // Note: jsPDF requires base64 or direct image URLs. Since these are external URLs that might have CORS issues,
-        // we use a proxy or direct URL if they allow cross-origin.
-        // For reliability in this environment, we'll try to add them directly.
         try {
-          doc.addImage('https://iili.io/q3KBl4V.png', 'PNG', 15, 10, 20, 25); // Logo Kota Makassar (Left)
-          doc.addImage('https://iili.io/q3KB5hb.png', 'PNG', pageWidth - 35, 10, 20, 25); // Logo Kecamatan (Right)
+          if (logoKotaBase64) {
+            doc.addImage(logoKotaBase64, 'PNG', 15, logoY, logoSize, logoSize);
+          } else {
+            doc.addImage('/assets/aistudio/logo_pemkot.png', 'PNG', 15, logoY, logoSize, logoSize); // Logo Kota Makassar (Left)
+          }
         } catch (e) {
-          console.warn('Could not load images for PDF', e);
+          console.warn('Could not load logo kota for PDF', e);
           doc.setFontSize(8);
           doc.text("[LOGO KOTA]", 20, 20);
+        }
+
+        try {
+          if (logoKecamatanBase64) {
+            doc.addImage(logoKecamatanBase64, 'PNG', pageWidth - 15 - logoSize, logoY, logoSize, logoSize); // Logo Kecamatan Baru (Right)
+          } else {
+            doc.addImage('/assets/aistudio/logo_kecamatan_ujung_pandang.png', 'PNG', pageWidth - 15 - logoSize, logoY, logoSize, logoSize);
+          }
+        } catch (e) {
+          console.warn('Could not load logo kecamatan for PDF', e);
+          doc.setFontSize(8);
           doc.text("[LOGO KECAMATAN]", pageWidth - 45, 20);
         }
 
