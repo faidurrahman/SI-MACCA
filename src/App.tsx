@@ -70,6 +70,68 @@ interface AgendaItem {
   linkUndangan?: string;
 }
 
+const APP_TIMEZONE = 'Asia/Makassar';
+
+const getAgendaDateKey = (rawDate?: string): string => {
+  if (!rawDate) return '';
+  const trimmed = rawDate.trim();
+  if (!trimmed) return '';
+
+  // Already in YYYY-MM-DD format
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    return trimmed;
+  }
+
+  // DD/MM/YYYY or DD-MM-YYYY format
+  const dmyMatch = trimmed.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/);
+  if (dmyMatch) {
+    const [, d, m, y] = dmyMatch;
+    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+  }
+
+  // ISO timestamp or parseable date string -> convert strictly in Asia/Makassar (WITA) timezone
+  const parsed = new Date(trimmed);
+  if (!isNaN(parsed.getTime())) {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: APP_TIMEZONE,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).formatToParts(parsed);
+    const year = parts.find(p => p.type === 'year')?.value;
+    const month = parts.find(p => p.type === 'month')?.value;
+    const day = parts.find(p => p.type === 'day')?.value;
+    if (year && month && day) {
+      return `${year}-${month}-${day}`;
+    }
+  }
+
+  // Fallback for Indonesian formatted date strings (e.g. "Kamis, 26 November 2026")
+  const months: { [key: string]: string } = {
+    'Januari': '01', 'Februari': '02', 'Maret': '03', 'April': '04',
+    'Mei': '05', 'Juni': '06', 'Juli': '07', 'Agustus': '08',
+    'September': '09', 'Oktober': '10', 'November': '11', 'Desember': '12'
+  };
+  const indoMatch = trimmed.match(/(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})/);
+  if (indoMatch) {
+    const day = indoMatch[1].padStart(2, '0');
+    const month = months[indoMatch[2]];
+    const year = indoMatch[3];
+    if (day && month && year) {
+      return `${year}-${month}-${day}`;
+    }
+  }
+
+  return '';
+};
+
+const getLocalDateKey = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 // --- Mock Data ---
 const AGENDAS: AgendaItem[] = [
   {
@@ -348,29 +410,10 @@ const AgendaModal = ({ isOpen, onClose, agenda = null, onRefresh }: { isOpen: bo
         }
       }
 
-      // Parse date (e.g., "Kamis, 19 Februari 2026" or "2026-02-19")
-      if (agenda.date) {
-        if (agenda.date.includes('-')) {
-          setDate(agenda.date);
-        } else {
-          // If it's a formatted string, we might need a more complex parser or 
-          // just hope the user picks a new date if it fails.
-          // For now, let's try to handle common Indonesian date format
-          const months: { [key: string]: string } = {
-            'Januari': '01', 'Februari': '02', 'Maret': '03', 'April': '04',
-            'Mei': '05', 'Juni': '06', 'Juli': '07', 'Agustus': '08',
-            'September': '09', 'Oktober': '10', 'November': '11', 'Desember': '12'
-          };
-          const parts = agenda.date.split(' ');
-          if (parts.length >= 4) {
-            const day = parts[1].padStart(2, '0');
-            const month = months[parts[2]];
-            const year = parts[3];
-            if (day && month && year) {
-              setDate(`${year}-${month}-${day}`);
-            }
-          }
-        }
+      // Parse date (e.g., ISO rawDate, "Kamis, 19 Februari 2026", or "2026-02-19")
+      const normalizedDate = getAgendaDateKey(agenda.rawDate) || getAgendaDateKey(agenda.date);
+      if (normalizedDate) {
+        setDate(normalizedDate);
       }
     } else {
       setStatus('HADIR');
@@ -1356,10 +1399,10 @@ const BerandaView = ({ setView, onAddAgenda, currentTime, onSelectAgenda, onEdit
     year: 'numeric' 
   });
 
+  const todayKey = getLocalDateKey(currentTime);
   const todayAgendas = agendas.filter(a => {
-    if (!a.rawDate) return false;
-    const aDate = new Date(a.rawDate);
-    return aDate.toDateString() === currentTime.toDateString();
+    const agendaKey = getAgendaDateKey(a.rawDate || a.date);
+    return agendaKey !== '' && agendaKey === todayKey;
   });
 
   const todayAgendasCount = todayAgendas.length;
@@ -1658,10 +1701,11 @@ const JadwalView = ({ currentTime, onSelectAgenda, onEditAgenda, onDeleteAgenda,
 
   const disposisiOptions = DISPOSISI_OPTIONS;
 
+  const selectedDateKey = getLocalDateKey(selectedDate);
   const filteredAgendas = agendas.filter(a => {
-    // Filter by date
-    const aDate = new Date(a.rawDate);
-    const isSameDate = aDate.toDateString() === selectedDate.toDateString();
+    // Filter by date using Asia/Makassar canonical date key
+    const agendaDateKey = getAgendaDateKey(a.rawDate || a.date);
+    const isSameDate = agendaDateKey !== '' && agendaDateKey === selectedDateKey;
     
     // Filter by disposisi
     const matchesDisposisi = filter === 'SEMUA' || a.disposisiTo?.includes(filter);
@@ -1897,61 +1941,14 @@ const LaporanView = ({ setView, agendas }: { setView: (v: View) => void, agendas
 
   const getFilteredAndGroupedData = () => {
     const filteredData = agendas.filter(item => {
-      if (!item.rawDate) return false;
-      let rawDate = item.rawDate.trim();
-      
-      if (/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) {
-         return rawDate >= startDate && rawDate <= endDate;
-      }
-
-      let d = new Date(rawDate);
-      if (isNaN(d.getTime())) {
-        const parts = rawDate.split(/[-/]/);
-        if (parts.length === 3 && parts[2].length === 4) {
-           const day = parseInt(parts[0]);
-           const month = parseInt(parts[1]) - 1;
-           const year = parseInt(parts[2]);
-           d = new Date(year, month, day);
-        }
-      }
-
-      if (isNaN(d.getTime())) return false;
-      
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      const itemDateKey = `${year}-${month}-${day}`;
-      
+      const itemDateKey = getAgendaDateKey(item.rawDate || item.date);
+      if (!itemDateKey) return false;
       return itemDateKey >= startDate && itemDateKey <= endDate;
     });
 
     const groupedData: { [key: string]: AgendaItem[] } = {};
     filteredData.forEach(item => {
-      if (!item.rawDate) return;
-      let rawDate = item.rawDate.trim();
-      let dateKey = '';
-
-      if (/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) {
-         dateKey = rawDate;
-      } else {
-         let d = new Date(rawDate);
-         if (isNaN(d.getTime())) {
-            const parts = rawDate.split(/[-/]/);
-            if (parts.length === 3 && parts[2].length === 4) {
-               const day = parseInt(parts[0]);
-               const month = parseInt(parts[1]) - 1;
-               const year = parseInt(parts[2]);
-               d = new Date(year, month, day);
-            }
-         }
-         if (!isNaN(d.getTime())) {
-            const year = d.getFullYear();
-            const month = String(d.getMonth() + 1).padStart(2, '0');
-            const day = String(d.getDate()).padStart(2, '0');
-            dateKey = `${year}-${month}-${day}`;
-         }
-      }
-      
+      const dateKey = getAgendaDateKey(item.rawDate || item.date);
       if (!dateKey) return;
       if (!groupedData[dateKey]) groupedData[dateKey] = [];
       groupedData[dateKey].push(item);
